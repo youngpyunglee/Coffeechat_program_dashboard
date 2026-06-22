@@ -1,0 +1,1382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MSTI Coffee Chat — Ambassador Portal</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <style>
+    :root {
+      --purple: #4b2e83;
+      --gold: #b7a57a;
+      --bg: #f0f2fb;
+      --surface: #ffffff;
+      --border: #e8eaf2;
+      --text: #1a1a2e;
+      --muted: #6b7280;
+      --danger: #dc2626;
+      --warning: #d97706;
+      --success: #16a34a;
+      --info: #2563eb;
+      --radius: 14px;
+      --sidebar-w: 240px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── App shell ── */
+    .app-shell { display: flex; min-height: 100vh; }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: var(--sidebar-w);
+      flex-shrink: 0;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0;
+      height: 100vh;
+      z-index: 100;
+      box-shadow: 2px 0 12px rgba(75,46,131,.06);
+    }
+
+    .sidebar-brand {
+      padding: 24px 20px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .sidebar-brand img { height: 38px; max-width: 100%; object-fit: contain; }
+
+    .sidebar-brand-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      color: var(--muted);
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .sidebar-nav-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      color: var(--muted);
+      padding: 0 8px;
+      margin: 8px 0 6px;
+    }
+
+    .sidebar-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--muted);
+      text-decoration: none;
+      transition: all .15s;
+    }
+
+    .sidebar-nav-item:hover { background: var(--bg); color: var(--text); }
+    .sidebar-nav-item.active { background: var(--purple); color: white; }
+    .sidebar-nav-item .tab-icon { font-size: 16px; width: 20px; text-align: center; flex-shrink: 0; }
+
+    .sidebar-footer {
+      padding: 16px 20px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .amb-chip {
+      background: #f0ebff;
+      color: var(--purple);
+      border-radius: 20px;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* ── Main area ── */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .main-topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 28px;
+      height: 58px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 90;
+    }
+
+    .main-topbar-title { font-size: 18px; font-weight: 700; color: var(--text); }
+    .main-topbar-right { display: flex; align-items: center; gap: 10px; }
+
+    /* ── Switcher bar ── */
+    .amb-switcher-bar {
+      background: #f8f6ff;
+      border-bottom: 1px solid var(--border);
+      padding: 10px 28px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 13px;
+      color: var(--purple);
+    }
+
+    .amb-switcher-bar label { font-weight: 600; }
+
+    .amb-switcher-bar select {
+      border: 1px solid #c0aee0;
+      border-radius: 8px;
+      padding: 5px 10px;
+      font-size: 13px;
+      color: var(--purple);
+      background: white;
+      outline: none;
+      cursor: pointer;
+    }
+
+    /* ── Container ── */
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 28px;
+      width: 100%;
+      min-height: calc(100vh - 58px);
+      display: flex;
+      flex-direction: column;
+    }
+    #no-selection-state {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 120px;
+    }
+
+    /* ── Old header/chip refs kept for JS ── */
+    .user-chip {
+      background: #f0ebff;
+      color: var(--purple);
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-size: 12px;
+      color: white;
+    }
+
+    .coordinator-link {
+      color: rgba(255,255,255,.7);
+      font-size: 12px;
+      text-decoration: none;
+      padding: 4px 10px;
+      border-radius: 4px;
+      border: 1px solid rgba(255,255,255,.25);
+      transition: all .15s;
+    }
+    .coordinator-link:hover { background: rgba(255,255,255,.1); color: white; }
+
+    .amb-switcher-bar select:focus { border-color: var(--purple); }
+
+    .sim-badge {
+      background: #fef3c7;
+      color: #92400e;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 99px;
+      letter-spacing: .4px;
+    }
+
+    /* ── Layout ── */
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 28px 24px;
+    }
+
+    /* ── Welcome banner ── */
+    .welcome-banner {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: 0 2px 12px rgba(75,46,131,.07);
+      padding: 20px 24px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .amb-big-avatar {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--purple);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .welcome-info h2 { font-size: 18px; font-weight: 700; }
+    .welcome-info p  { font-size: 13px; color: var(--muted); margin-top: 3px; }
+
+    .welcome-stats {
+      margin-left: auto;
+      display: flex;
+      gap: 24px;
+      text-align: center;
+    }
+
+    .w-stat-val { font-size: 22px; font-weight: 700; color: var(--purple); }
+    .w-stat-lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+
+    /* ── Section label ── */
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .7px;
+      color: var(--muted);
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* ── Request cards ── */
+    .request-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: 0 2px 12px rgba(75,46,131,.07);
+      padding: 20px 24px;
+      margin-bottom: 14px;
+      position: relative;
+      transition: box-shadow .15s;
+    }
+
+    .request-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,.08); }
+
+    .request-card.is-done {
+      opacity: .7;
+    }
+
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      gap: 12px;
+    }
+
+    .card-student-name { font-size: 16px; font-weight: 700; }
+    .card-student-email { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    .card-badges {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    /* ── Status badges ── */
+    .status {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 99px;
+      white-space: nowrap;
+    }
+    .status-pending   { background: #fef9c3; color: #713f12; }
+    .status-intro     { background: #dbeafe; color: #1e40af; }
+    .status-confirmed { background: #dcfce7; color: #14532d; }
+    .status-completed { background: #f0fdf4; color: #15803d; border: 1px solid #86efac; }
+    .status-feedback  { background: #f3e8ff; color: #6b21a8; }
+    .status-received  { background: #ecfdf5; color: #065f46; }
+
+    .interest-badge {
+      display: inline-block;
+      background: #f3f4f6;
+      color: #374151;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+
+    /* ── Card meta grid ── */
+    .card-meta {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+      background: #fafafa;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 12px 16px;
+    }
+
+    .meta-item-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      color: var(--muted);
+      margin-bottom: 3px;
+    }
+
+    .meta-item-val { font-size: 13px; font-weight: 500; }
+
+    /* ── Card actions ── */
+    .card-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 8px 14px;
+      transition: all .15s;
+      white-space: nowrap;
+      font-family: inherit;
+    }
+    .btn-primary   { background: var(--purple); color: white; }
+    .btn-primary:hover { background: #3d2369; }
+    .btn-outline   { background: transparent; border: 1.5px solid var(--border); color: var(--text); }
+    .btn-outline:hover { border-color: var(--purple); color: var(--purple); }
+    .btn-success   { background: #16a34a; color: white; }
+    .btn-success:hover { background: #15803d; }
+    .btn-disabled  { background: #e5e7eb; color: var(--muted); cursor: default; }
+
+    .btn-sm { padding: 5px 10px; font-size: 12px; }
+
+    /* ── Empty state ── */
+    .empty-state {
+      text-align: center;
+      padding: 60px 24px;
+      color: var(--muted);
+    }
+    .empty-state .empty-icon { font-size: 36px; margin-bottom: 12px; color: var(--purple); }
+    .empty-state h3 { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+    .empty-state p  { font-size: 13px; }
+
+    /* ── Timeline / Activity ── */
+    .timeline-toggle {
+      font-size: 12px;
+      color: var(--purple);
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-family: inherit;
+      font-weight: 600;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .timeline-toggle:hover { text-decoration: underline; }
+
+    .timeline {
+      margin-top: 12px;
+      border-top: 1px solid var(--border);
+      padding-top: 12px;
+      display: none;
+    }
+
+    .timeline.open { display: block; }
+
+    .tl-entry {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 8px;
+      font-size: 12px;
+      align-items: flex-start;
+    }
+
+    .tl-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--border);
+      margin-top: 3px;
+      flex-shrink: 0;
+    }
+    .tl-dot.type-created  { background: #7c3aed; }
+    .tl-dot.type-assigned { background: var(--info); }
+    .tl-dot.type-status   { background: var(--success); }
+    .tl-dot.type-note     { background: var(--warning); }
+
+    .tl-action { font-weight: 500; color: var(--text); }
+    .tl-date   { color: var(--muted); margin-left: auto; white-space: nowrap; }
+
+    /* ── Modal ── */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+    }
+
+    .modal {
+      background: var(--surface);
+      border-radius: 10px;
+      width: 560px;
+      max-width: 96vw;
+      padding: 28px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.25);
+      position: relative;
+    }
+
+    .modal h2 { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+    .modal-sub { font-size: 13px; color: var(--muted); margin-bottom: 18px; }
+
+    .email-preview {
+      background: #f9f8ff;
+      border: 1px solid #e0d9f5;
+      border-radius: 6px;
+      padding: 18px 20px;
+      font-size: 13px;
+      line-height: 1.7;
+      margin-bottom: 18px;
+      max-height: 380px;
+      overflow-y: auto;
+    }
+
+    .email-preview p { margin-bottom: 12px; }
+
+    .email-section-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .email-sig {
+      margin-top: 20px;
+      padding-top: 12px;
+      border-top: 1px solid #e0d9f5;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .sig-social {
+      display: flex;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .sig-social a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--purple);
+      color: white;
+      font-size: 13px;
+      text-decoration: none;
+    }
+
+    .sig-social a:hover { background: #3d2369; }
+
+    /* ── Add note textarea in modal ── */
+    .note-textarea {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 13px;
+      font-family: inherit;
+      resize: vertical;
+      min-height: 70px;
+      outline: none;
+      margin-bottom: 12px;
+    }
+    .note-textarea:focus { border-color: var(--purple); }
+
+    /* ── Toast ── */
+    #toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .toast {
+      padding: 12px 18px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: 0 4px 16px rgba(0,0,0,.15);
+      animation: slideIn .2s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toast-success { background: #16a34a; color: white; }
+    .toast-info    { background: #2563eb; color: white; }
+    .toast-warning { background: #d97706; color: white; }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Feedback form questions ── */
+    .fq {
+      margin-bottom: 22px;
+    }
+
+    .fq-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 10px;
+      line-height: 1.4;
+    }
+
+    .fq-option {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      color: var(--text);
+      padding: 5px 0;
+      cursor: pointer;
+    }
+
+    .fq-option input[type="radio"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--purple);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    /* ── No-assignment placeholder ── */
+    .no-amb {
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      border-radius: 6px;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: #9a3412;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+  </style>
+</head>
+<body>
+<div class="app-shell">
+
+<!-- ── Sidebar ── -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <img src="images/gix_logo.png" alt="GIX">
+    <div class="sidebar-brand-label">Coffee Chat Program</div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="sidebar-nav-label">Menu</div>
+    <a class="sidebar-nav-item active" href="#">
+      <span class="tab-icon"><i class="fa-solid fa-mug-hot"></i></span> My Requests
+    </a>
+    <a class="sidebar-nav-item" href="index.html">
+      <span class="tab-icon"><i class="fa-solid fa-arrow-left"></i></span> Coordinator View
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="amb-chip"><i class="fa-solid fa-user"></i> <span id="header-user-chip">Select an ambassador</span></div>
+  </div>
+</aside>
+
+<!-- ── Main ── -->
+<div class="main">
+
+<div class="main-topbar">
+  <div class="main-topbar-title">Ambassador Portal</div>
+  <div class="main-topbar-right">
+    <span class="sim-badge">DEMO</span>
+    <label for="amb-switcher" style="font-size:13px;font-weight:600;color:var(--muted)">Viewing as:</label>
+    <select id="amb-switcher" onchange="switchAmbassador(this.value)" style="border:1px solid var(--border);border-radius:8px;padding:5px 10px;font-size:13px;outline:none;cursor:pointer;">
+      <option value="">— Select your name —</option>
+    </select>
+  </div>
+</div>
+
+<div class="container" id="main-content">
+
+  <!-- No ambassador selected -->
+  <div id="no-selection-state" class="empty-state" style="padding:0">
+    <div class="empty-icon"><i class="fa-solid fa-mug-hot"></i></div>
+    <h3>Welcome to the Ambassador Portal</h3>
+    <p>Select your name above to see your assigned coffee chat requests.</p>
+  </div>
+
+  <!-- Ambassador dashboard (shown once selected) -->
+  <div id="amb-dashboard" style="display:none">
+
+    <!-- Welcome banner -->
+    <div class="welcome-banner" id="welcome-banner"></div>
+
+    <!-- Active requests -->
+    <div id="active-section">
+      <div class="section-label" id="active-label">Active Requests</div>
+      <div id="active-list"></div>
+    </div>
+
+    <!-- Completed requests -->
+    <div id="completed-section" style="margin-top:28px;display:none">
+      <div class="section-label" id="completed-label">Completed</div>
+      <div id="completed-list"></div>
+    </div>
+
+  </div>
+
+</div><!-- /container -->
+</div><!-- /main -->
+</div><!-- /app-shell -->
+
+<!-- Toast container -->
+<div id="toast-container"></div>
+
+<!-- Email modal -->
+<div id="email-modal-backdrop" class="modal-backdrop" style="display:none" onclick="closeEmailModal(event)">
+  <div class="modal" id="email-modal-box">
+    <h2 id="email-modal-title">Send Intro Email</h2>
+    <p class="modal-sub" id="email-modal-sub"></p>
+    <div class="email-section-label">EMAIL PREVIEW</div>
+    <div class="email-preview" id="email-preview-body"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeEmailModal()">Cancel</button>
+      <button class="btn btn-primary" id="email-modal-send-btn">Send Email</button>
+    </div>
+  </div>
+</div>
+
+<!-- Feedback form modal -->
+<div id="done-modal-backdrop" class="modal-backdrop" style="display:none" onclick="closeDoneModal(event)">
+  <div class="modal" style="width:560px;max-height:90vh;overflow-y:auto">
+    <h2>Post-Chat Feedback</h2>
+    <p class="modal-sub" id="done-modal-sub"></p>
+
+    <!-- Q7 -->
+    <div class="fq">
+      <div class="fq-label">1. Which program is the student interested in?</div>
+      <label class="fq-option"><input type="radio" name="fq-program" value="Full-time program"> Full-time program</label>
+      <label class="fq-option"><input type="radio" name="fq-program" value="Hybrid program"> Hybrid program</label>
+    </div>
+
+    <!-- Q8 -->
+    <div class="fq">
+      <div class="fq-label">2. What was the prospective student most interested in learning about?</div>
+      <label class="fq-option"><input type="radio" name="fq-interest" value="Academics & Curriculum"> Academics &amp; Curriculum</label>
+      <label class="fq-option"><input type="radio" name="fq-interest" value="Research Opportunities"> Research Opportunities</label>
+      <label class="fq-option"><input type="radio" name="fq-interest" value="Campus Life"> Campus Life</label>
+      <label class="fq-option"><input type="radio" name="fq-interest" value="Admissions Process"> Admissions Process</label>
+      <label class="fq-option"><input type="radio" name="fq-interest" value="Financial Aid / Scholarships"> Financial Aid / Scholarships</label>
+      <label class="fq-option"><input type="radio" name="fq-interest" value="Career Paths"> Career Paths</label>
+      <label class="fq-option"><input type="radio" name="fq-interest" value="Other"> Other</label>
+    </div>
+
+    <!-- Q9 -->
+    <div class="fq">
+      <div class="fq-label">3. Do you believe this prospective student is well-suited for the MSTI program?</div>
+      <label class="fq-option"><input type="radio" name="fq-suited" value="Yes"> Yes</label>
+      <label class="fq-option"><input type="radio" name="fq-suited" value="No"> No</label>
+      <label class="fq-option"><input type="radio" name="fq-suited" value="Unsure"> Unsure</label>
+    </div>
+
+    <!-- Q10 -->
+    <div class="fq">
+      <div class="fq-label">4. Were there any questions you weren't able to answer? <span style="color:var(--danger)">*</span></div>
+      <label class="fq-option"><input type="radio" name="fq-unanswered" value="Yes" onchange="toggleQ11(this.value)"> Yes</label>
+      <label class="fq-option"><input type="radio" name="fq-unanswered" value="No" onchange="toggleQ11(this.value)"> No</label>
+    </div>
+
+    <!-- Q11 (conditional) -->
+    <div class="fq" id="fq-q11" style="display:none">
+      <div class="fq-label">5. What were those questions about? <span style="color:var(--danger)">*</span></div>
+      <label class="fq-option"><input type="radio" name="fq-unanswered-topic" value="Admissions requirements"> Admissions requirements</label>
+      <label class="fq-option"><input type="radio" name="fq-unanswered-topic" value="Deadlines"> Deadlines</label>
+      <label class="fq-option"><input type="radio" name="fq-unanswered-topic" value="Tuition / scholarships"> Tuition / scholarships</label>
+      <label class="fq-option"><input type="radio" name="fq-unanswered-topic" value="Research opportunities"> Research opportunities</label>
+      <label class="fq-option"><input type="radio" name="fq-unanswered-topic" value="Career outcomes"> Career outcomes</label>
+      <label class="fq-option"><input type="radio" name="fq-unanswered-topic" value="Program curriculum"> Program curriculum</label>
+      <label class="fq-option"><input type="radio" name="fq-unanswered-topic" value="Other"> Other</label>
+    </div>
+
+    <!-- Q12 -->
+    <div class="fq">
+      <div class="fq-label">6. Anything you'd like to share from this conversation?</div>
+      <textarea class="note-textarea" id="fq-notes" placeholder="Share any observations or notes for the coordinator…"></textarea>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeDoneModal()">Cancel</button>
+      <button class="btn btn-success" id="done-confirm-btn">✓ Submit &amp; Mark Complete</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────
+// Shared data (mirrors coordinator data)
+// ─────────────────────────────────────────
+
+const AMBASSADORS = [
+  { id: 1, name: "Sarah Kim",       email: "skim@uw.edu",      cohort: "MSTI '24",   type: "student", linkedin: "linkedin.com/in/sarahkim" },
+  { id: 2, name: "Marcus Chen",     email: "mchen@uw.edu",     cohort: "MSTI '23",   type: "student", linkedin: "linkedin.com/in/marcuschen" },
+  { id: 3, name: "Priya Patel",     email: "ppatel@uw.edu",    cohort: "MSTI '24",   type: "student", linkedin: "linkedin.com/in/priyapatel" },
+  { id: 4, name: "James O\'Brien",  email: "jobrien@uw.edu",   cohort: "Alumni '22", type: "alumni",  linkedin: "linkedin.com/in/jamesobrien" },
+  { id: 5, name: "Leila Nazari",    email: "lnazari@uw.edu",   cohort: "MSTI '24",   type: "student", linkedin: "linkedin.com/in/leilanazari" },
+  { id: 6, name: "David Park",      email: "dpark@uw.edu",     cohort: "Alumni '23", type: "alumni",  linkedin: "linkedin.com/in/davidpark" },
+];
+
+const STATUS_CLASSES = {
+  "Pending Assignment":   "status-pending",
+  "Intro Sent":           "status-intro",
+  "Ambassador Confirmed": "status-confirmed",
+  "Chat Completed":       "status-completed",
+  "Feedback Sent":        "status-feedback",
+  "Feedback Received":    "status-received",
+};
+
+let requests = [
+  {
+    id: 1,
+    studentName: "Alex Johnson",
+    studentEmail: "alex.johnson@gmail.com",
+    submitted: "2026-06-18",
+    interest: "Software Engineering",
+    preferredType: "student",
+    ambId: null,
+    status: "Pending Assignment",
+    statusUpdated: "2026-06-18",
+    notes: "",
+    activityLog: [{ date: "2026-06-18", action: "Request submitted", type: "created" }],
+  },
+  {
+    id: 2,
+    studentName: "Maria Garcia",
+    studentEmail: "mgarcia@outlook.com",
+    submitted: "2026-06-16",
+    interest: "Product Management",
+    preferredType: "any",
+    ambId: 1,
+    status: "Intro Sent",
+    statusUpdated: "2026-06-17",
+    notes: "",
+    activityLog: [
+      { date: "2026-06-16", action: "Request submitted", type: "created" },
+      { date: "2026-06-17", action: "Ambassador assigned: Sarah Kim", type: "assigned" },
+      { date: "2026-06-17", action: "Intro email sent by coordinator", type: "status" },
+    ],
+  },
+  {
+    id: 3,
+    studentName: "Tyler Brooks",
+    studentEmail: "tyler.b@yahoo.com",
+    submitted: "2026-06-14",
+    interest: "Data & AI",
+    preferredType: "alumni",
+    ambId: 3,
+    status: "Ambassador Confirmed",
+    statusUpdated: "2026-06-15",
+    notes: "",
+    activityLog: [
+      { date: "2026-06-14", action: "Request submitted", type: "created" },
+      { date: "2026-06-14", action: "Ambassador assigned: Priya Patel", type: "assigned" },
+      { date: "2026-06-14", action: "Intro email sent by coordinator", type: "status" },
+      { date: "2026-06-15", action: "Ambassador confirmed availability", type: "status" },
+    ],
+  },
+  {
+    id: 4,
+    studentName: "Aisha Okonkwo",
+    studentEmail: "aokonkwo@gmail.com",
+    submitted: "2026-06-10",
+    interest: "UX / Design",
+    preferredType: "student",
+    ambId: 2,
+    status: "Chat Completed",
+    statusUpdated: "2026-06-13",
+    notes: "Student mentioned interest in the Design track specifically.",
+    activityLog: [
+      { date: "2026-06-10", action: "Request submitted", type: "created" },
+      { date: "2026-06-10", action: "Ambassador assigned: Marcus Chen", type: "assigned" },
+      { date: "2026-06-11", action: "Intro email sent by coordinator", type: "status" },
+      { date: "2026-06-12", action: "Ambassador confirmed availability", type: "status" },
+      { date: "2026-06-13", action: "Chat completed", type: "status" },
+    ],
+  },
+  {
+    id: 5,
+    studentName: "Nathan Wu",
+    studentEmail: "nwu2026@uw.edu",
+    submitted: "2026-06-05",
+    interest: "Cybersecurity",
+    preferredType: "alumni",
+    ambId: 4,
+    status: "Feedback Sent",
+    statusUpdated: "2026-06-12",
+    notes: "",
+    activityLog: [
+      { date: "2026-06-05", action: "Request submitted", type: "created" },
+      { date: "2026-06-06", action: "Ambassador assigned: James O\'Brien", type: "assigned" },
+      { date: "2026-06-07", action: "Intro email sent by coordinator", type: "status" },
+      { date: "2026-06-09", action: "Ambassador confirmed availability", type: "status" },
+      { date: "2026-06-11", action: "Chat completed", type: "status" },
+      { date: "2026-06-12", action: "Feedback form sent to student", type: "status" },
+    ],
+  },
+  {
+    id: 6,
+    studentName: "Sophie Tremblay",
+    studentEmail: "stremblay@gmail.com",
+    submitted: "2026-05-30",
+    interest: "Product Management",
+    preferredType: "any",
+    ambId: 5,
+    status: "Feedback Received",
+    statusUpdated: "2026-06-08",
+    notes: "Very positive feedback.",
+    activityLog: [
+      { date: "2026-05-30", action: "Request submitted", type: "created" },
+      { date: "2026-05-31", action: "Ambassador assigned: Leila Nazari", type: "assigned" },
+      { date: "2026-06-01", action: "Intro email sent by coordinator", type: "status" },
+      { date: "2026-06-02", action: "Ambassador confirmed availability", type: "status" },
+      { date: "2026-06-05", action: "Chat completed", type: "status" },
+      { date: "2026-06-06", action: "Feedback form sent to student", type: "status" },
+      { date: "2026-06-08", action: "Feedback received", type: "status" },
+    ],
+  },
+  {
+    id: 7,
+    studentName: "Raj Mehta",
+    studentEmail: "rajmehta@gmail.com",
+    submitted: "2026-06-08",
+    interest: "Software Engineering",
+    preferredType: "alumni",
+    ambId: 6,
+    status: "Intro Sent",
+    statusUpdated: "2026-06-09",
+    notes: "",
+    activityLog: [
+      { date: "2026-06-08", action: "Request submitted", type: "created" },
+      { date: "2026-06-08", action: "Ambassador assigned: David Park", type: "assigned" },
+      { date: "2026-06-09", action: "Intro email sent by coordinator", type: "status" },
+    ],
+  },
+  {
+    id: 8,
+    studentName: "Chloe Dubois",
+    studentEmail: "cdubois@icloud.com",
+    submitted: "2026-06-01",
+    interest: "Data & AI",
+    preferredType: "student",
+    ambId: 2,
+    status: "Intro Sent",
+    statusUpdated: "2026-06-02",
+    notes: "",
+    activityLog: [
+      { date: "2026-06-01", action: "Request submitted", type: "created" },
+      { date: "2026-06-01", action: "Ambassador assigned: Marcus Chen", type: "assigned" },
+      { date: "2026-06-02", action: "Intro email sent by coordinator", type: "status" },
+    ],
+  },
+  {
+    id: 9,
+    studentName: "Ethan Park",
+    studentEmail: "ethanp@gmail.com",
+    submitted: "2026-06-17",
+    interest: "Cybersecurity",
+    preferredType: "alumni",
+    ambId: null,
+    status: "Pending Assignment",
+    statusUpdated: "2026-06-17",
+    notes: "",
+    activityLog: [{ date: "2026-06-17", action: "Request submitted", type: "created" }],
+  },
+  {
+    id: 10,
+    studentName: "Fatima Al-Rashid",
+    studentEmail: "falrashid@hotmail.com",
+    submitted: "2026-06-11",
+    interest: "UX / Design",
+    preferredType: "any",
+    ambId: 3,
+    status: "Chat Completed",
+    statusUpdated: "2026-06-14",
+    notes: "",
+    activityLog: [
+      { date: "2026-06-11", action: "Request submitted", type: "created" },
+      { date: "2026-06-11", action: "Ambassador assigned: Priya Patel", type: "assigned" },
+      { date: "2026-06-12", action: "Intro email sent by coordinator", type: "status" },
+      { date: "2026-06-13", action: "Ambassador confirmed availability", type: "status" },
+      { date: "2026-06-14", action: "Chat completed", type: "status" },
+    ],
+  },
+];
+
+// ─────────────────────────────────────────
+// State
+// ─────────────────────────────────────────
+
+let currentAmbId = null;
+let emailModalReqId = null;
+let emailModalType = null; // 'intro' | 'followup'
+let doneModalReqId = null;
+
+// ─────────────────────────────────────────
+// Helpers
+// ─────────────────────────────────────────
+
+function fmt(dateStr) {
+  return new Date(dateStr).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+}
+
+function today() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function isDone(r) {
+  return ["Chat Completed", "Feedback Sent", "Feedback Received"].includes(r.status);
+}
+
+function initials(name) {
+  return name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+}
+
+// ─────────────────────────────────────────
+// Toast
+// ─────────────────────────────────────────
+
+function toast(msg, type = "success") {
+  const el = document.createElement("div");
+  el.className = `toast toast-${type}`;
+  el.textContent = msg;
+  document.getElementById("toast-container").appendChild(el);
+  setTimeout(() => el.remove(), 3200);
+}
+
+// ─────────────────────────────────────────
+// Populate switcher
+// ─────────────────────────────────────────
+
+function populateSwitcher() {
+  const sel = document.getElementById("amb-switcher");
+  AMBASSADORS.forEach(a => {
+    const opt = document.createElement("option");
+    opt.value = a.id;
+    opt.textContent = `${a.name} (${a.cohort})`;
+    sel.appendChild(opt);
+  });
+}
+
+// ─────────────────────────────────────────
+// Switch ambassador
+// ─────────────────────────────────────────
+
+function switchAmbassador(id) {
+  currentAmbId = id ? parseInt(id) : null;
+  document.getElementById("no-selection-state").style.display = currentAmbId ? "none" : "";
+  document.getElementById("amb-dashboard").style.display = currentAmbId ? "" : "none";
+
+  if (!currentAmbId) {
+    document.getElementById("header-user-chip").textContent = "Select an ambassador";
+    return;
+  }
+
+  const amb = AMBASSADORS.find(a => a.id === currentAmbId);
+  document.getElementById("header-user-chip").textContent = amb.name;
+  renderDashboard();
+}
+
+// ─────────────────────────────────────────
+// Render
+// ─────────────────────────────────────────
+
+function renderDashboard() {
+  if (!currentAmbId) return;
+  const amb = AMBASSADORS.find(a => a.id === currentAmbId);
+  const myRequests = requests
+    .filter(r => r.ambId === currentAmbId)
+    .sort((a, b) => new Date(b.submitted) - new Date(a.submitted));
+
+  const active = myRequests.filter(r => !isDone(r));
+  const completed = myRequests.filter(r => isDone(r));
+
+  // Welcome banner
+  document.getElementById("welcome-banner").innerHTML = `
+    <div class="amb-big-avatar">${initials(amb.name)}</div>
+    <div class="welcome-info">
+      <h2>Welcome, ${amb.name.split(' ')[0]}!</h2>
+      <p>${amb.cohort} · ${amb.type === 'alumni' ? 'Alumni Ambassador' : 'Student Ambassador'} · ${amb.email}</p>
+    </div>
+    <div class="welcome-stats">
+      <div>
+        <div class="w-stat-val">${active.length}</div>
+        <div class="w-stat-lbl">Active</div>
+      </div>
+      <div>
+        <div class="w-stat-val">${completed.length}</div>
+        <div class="w-stat-lbl">Completed</div>
+      </div>
+      <div>
+        <div class="w-stat-val">${myRequests.length}</div>
+        <div class="w-stat-lbl">Total</div>
+      </div>
+    </div>
+  `;
+
+  // Active section
+  document.getElementById("active-label").textContent = `Active Requests (${active.length})`;
+  if (active.length === 0) {
+    document.getElementById("active-list").innerHTML = `
+      <div class="empty-state" style="padding:32px 24px">
+        <div class="empty-icon" style="font-size:30px"><i class="fa-solid fa-circle-check"></i></div>
+        <h3>All caught up!</h3>
+        <p>You have no active coffee chat requests right now.</p>
+      </div>
+    `;
+  } else {
+    document.getElementById("active-list").innerHTML = active.map(r => buildCard(r, amb)).join('');
+  }
+
+  // Completed section
+  const completedSection = document.getElementById("completed-section");
+  if (completed.length > 0) {
+    completedSection.style.display = '';
+    document.getElementById("completed-label").textContent = `Completed (${completed.length})`;
+    document.getElementById("completed-list").innerHTML = completed.map(r => buildCard(r, amb)).join('');
+  } else {
+    completedSection.style.display = 'none';
+  }
+}
+
+function buildCard(r, amb) {
+  const done = isDone(r);
+  const statusClass = STATUS_CLASSES[r.status] || '';
+
+  // Determine what actions are available
+  let actions = '';
+
+  if (!done) {
+    // Can always send/resend an intro or follow-up email
+    const emailBtnLabel = r.status === 'Intro Sent' || r.status === 'Ambassador Confirmed'
+      ? '<i class="fa-regular fa-envelope"></i> Send Follow-up Email'
+      : '<i class="fa-regular fa-envelope"></i> Send Intro Email';
+    const emailType = r.status === 'Intro Sent' || r.status === 'Ambassador Confirmed' ? 'followup' : 'intro';
+
+    actions += `<button class="btn btn-outline btn-sm" onclick="openEmailModal(${r.id}, '${emailType}')">${emailBtnLabel}</button>`;
+
+    // Confirm availability (only from Intro Sent)
+    if (r.status === 'Intro Sent') {
+      actions += `<button class="btn btn-primary btn-sm" onclick="confirmAvailability(${r.id})"><i class="fa-solid fa-check"></i> Confirm Availability</button>`;
+    }
+
+    // Mark done (once confirmed or intro sent)
+    if (r.status === 'Ambassador Confirmed' || r.status === 'Intro Sent') {
+      actions += `<button class="btn btn-success btn-sm" onclick="openDoneModal(${r.id})"><i class="fa-solid fa-circle-check"></i> Mark Chat Done</button>`;
+    }
+  } else {
+    // Completed — just show a follow-up email option in case they need to respond
+    actions += `<button class="btn btn-outline btn-sm" onclick="openEmailModal(${r.id}, 'followup')"><i class="fa-regular fa-envelope"></i> Send Follow-up</button>`;
+  }
+
+  const logs = [...(r.activityLog || [])].reverse();
+  const timelineHtml = logs.map(l => `
+    <div class="tl-entry">
+      <div class="tl-dot type-${l.type}"></div>
+      <span class="tl-action">${l.action}</span>
+      <span class="tl-date">${fmt(l.date)}</span>
+    </div>
+  `).join('');
+
+  return `
+    <div class="request-card ${done ? 'is-done' : ''}" id="card-${r.id}">
+      <div class="card-top">
+        <div>
+          <div class="card-student-name">${r.studentName}</div>
+          <div class="card-student-email">${r.studentEmail}</div>
+        </div>
+        <div class="card-badges">
+          <span class="status ${statusClass}">${r.status}</span>
+          <span class="interest-badge">${r.interest}</span>
+        </div>
+      </div>
+
+      <div class="card-meta">
+        <div>
+          <div class="meta-item-label">Submitted</div>
+          <div class="meta-item-val">${fmt(r.submitted)}</div>
+        </div>
+        <div>
+          <div class="meta-item-label">Program Interest</div>
+          <div class="meta-item-val">${r.interest}</div>
+        </div>
+        <div>
+          <div class="meta-item-label">Student Email</div>
+          <div class="meta-item-val" style="font-size:12px">${r.studentEmail}</div>
+        </div>
+      </div>
+
+      <div class="card-actions">
+        ${actions}
+        <button class="timeline-toggle" onclick="toggleTimeline(${r.id}, this)">
+          <i class="fa-solid fa-clock-rotate-left" style="font-size:11px"></i> Activity (${r.activityLog.length})
+        </button>
+      </div>
+
+      <div class="timeline" id="timeline-${r.id}">
+        ${timelineHtml}
+      </div>
+    </div>
+  `;
+}
+
+// ─────────────────────────────────────────
+// Actions
+// ─────────────────────────────────────────
+
+function confirmAvailability(reqId) {
+  const r = requests.find(x => x.id === reqId);
+  if (!r) return;
+  r.status = "Ambassador Confirmed";
+  r.statusUpdated = today();
+  r.activityLog.push({ date: today(), action: "Ambassador confirmed availability", type: "status" });
+  toast("✓ Availability confirmed! The coordinator has been notified.", "success");
+  renderDashboard();
+}
+
+function openDoneModal(reqId) {
+  const r = requests.find(x => x.id === reqId);
+  if (!r) return;
+  doneModalReqId = reqId;
+  document.getElementById("done-modal-sub").textContent =
+    `Coffee chat with ${r.studentName} — please fill out the feedback below.`;
+  // Reset all form fields
+  document.querySelectorAll('#done-modal-backdrop input[type="radio"]').forEach(el => el.checked = false);
+  document.getElementById("fq-notes").value = "";
+  document.getElementById("fq-q11").style.display = "none";
+  document.getElementById("done-confirm-btn").onclick = () => confirmDone(reqId);
+  document.getElementById("done-modal-backdrop").style.display = "flex";
+}
+
+function closeDoneModal(e) {
+  if (e && e.target !== document.getElementById("done-modal-backdrop")) return;
+  document.getElementById("done-modal-backdrop").style.display = "none";
+  doneModalReqId = null;
+}
+
+function toggleQ11(val) {
+  document.getElementById("fq-q11").style.display = val === "Yes" ? "" : "none";
+  if (val !== "Yes") {
+    document.querySelectorAll('input[name="fq-unanswered-topic"]').forEach(el => el.checked = false);
+  }
+}
+
+function confirmDone(reqId) {
+  const r = requests.find(x => x.id === reqId);
+  if (!r) return;
+
+  const unanswered = document.querySelector('input[name="fq-unanswered"]:checked');
+  if (!unanswered) { toast("Please answer all required questions", "warning"); return; }
+  if (unanswered.value === "Yes" && !document.querySelector('input[name="fq-unanswered-topic"]:checked')) {
+    toast("Please select what the unanswered questions were about", "warning"); return;
+  }
+
+  const program  = document.querySelector('input[name="fq-program"]:checked')?.value || "—";
+  const interest = document.querySelector('input[name="fq-interest"]:checked')?.value || "—";
+  const suited   = document.querySelector('input[name="fq-suited"]:checked')?.value || "—";
+  const unansweredVal = unanswered.value;
+  const topic    = unansweredVal === "Yes"
+    ? document.querySelector('input[name="fq-unanswered-topic"]:checked')?.value || "—"
+    : null;
+  const notes    = document.getElementById("fq-notes").value.trim();
+
+  r.status = "Chat Completed";
+  r.statusUpdated = today();
+  r.activityLog.push({ date: today(), action: "Chat completed (marked by ambassador)", type: "status" });
+  r.activityLog.push({ date: today(), action: `Feedback: Program interest — ${program}`, type: "note" });
+  r.activityLog.push({ date: today(), action: `Feedback: Most interested in — ${interest}`, type: "note" });
+  r.activityLog.push({ date: today(), action: `Feedback: Well-suited for MSTI — ${suited}`, type: "note" });
+  if (topic) r.activityLog.push({ date: today(), action: `Feedback: Unanswered questions about — ${topic}`, type: "note" });
+  if (notes) r.activityLog.push({ date: today(), action: `Note: ${notes.slice(0,80)}${notes.length>80?'…':''}`, type: "note" });
+
+  r.feedback = { program, interest, suited, unansweredQuestions: unansweredVal, unansweredTopic: topic, notes };
+
+  document.getElementById("done-modal-backdrop").style.display = "none";
+  doneModalReqId = null;
+  toast("✓ Feedback submitted & chat marked complete!", "success");
+  renderDashboard();
+}
+
+// ─────────────────────────────────────────
+// Email modal
+// ─────────────────────────────────────────
+
+function openEmailModal(reqId, type) {
+  const r = requests.find(x => x.id === reqId);
+  const amb = AMBASSADORS.find(a => a.id === currentAmbId);
+  if (!r || !amb) return;
+
+  emailModalReqId = reqId;
+  emailModalType = type;
+
+  const isFollowup = type === 'followup';
+  document.getElementById("email-modal-title").textContent = isFollowup ? "Send Follow-up Email" : "Send Intro Email";
+  document.getElementById("email-modal-sub").textContent =
+    `To: ${r.studentName} <${r.studentEmail}>`;
+
+  const emailBody = isFollowup
+    ? buildFollowupEmail(r, amb)
+    : buildIntroEmail(r, amb);
+
+  document.getElementById("email-preview-body").innerHTML = emailBody;
+
+  document.getElementById("email-modal-send-btn").onclick = () => sendEmail(reqId, type);
+  document.getElementById("email-modal-backdrop").style.display = "flex";
+}
+
+function closeEmailModal(e) {
+  if (e && e.target !== document.getElementById("email-modal-backdrop")) return;
+  document.getElementById("email-modal-backdrop").style.display = "none";
+  emailModalReqId = null;
+}
+
+function emailSignature(amb) {
+  return `<div class="email-sig">
+  <strong>${amb.name}</strong><br>
+  MSTI ${amb.type === 'alumni' ? 'Alumni' : 'Student'} Ambassador<br>
+  University of Washington
+  <div style="margin-top:10px">
+    <img src="images/email_image.png" alt="GIX" style="height:60px;display:block;" />
+  </div>
+  <div class="sig-social" style="margin-top:8px">
+    <a href="#" title="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
+    <a href="#" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
+    <a href="#" title="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+    <a href="#" title="X / Twitter"><i class="fa-brands fa-x-twitter"></i></a>
+  </div>
+</div>`;
+}
+
+function buildIntroEmail(r, amb) {
+  const firstName = r.studentName.split(' ')[0];
+  return `<div><p>Hi ${firstName},</p><p>I hope you're doing well! My name is ${amb.name}, and I'm a current MSTI student at the University of Washington. I was matched with you through the MSTI Coffee Chat Program, and I'd be happy to connect and answer any questions you may have about the program.</p><p>We can connect in whatever format works best for you, whether over Zoom, by email, or in person if you're nearby. Feel free to ask about the MSTI curriculum, student life, projects, the GIX community, living in the Seattle/Bellevue area, or anything else you're curious about.</p><p>Please feel free to send me a few times that work for you, or let me know if you'd prefer to ask questions over email instead.</p><p>Looking forward to connecting with you!</p><p>Best,</p>${emailSignature(amb)}</div>`;
+}
+
+function buildFollowupEmail(r, amb) {
+  const firstName = r.studentName.split(' ')[0];
+  return `<div><p>Hi ${firstName},</p><p>I hope you're doing well! My name is ${amb.name}, and I'm a current MSTI student at the University of Washington. I was matched with you through the MSTI Coffee Chat Program, and I'd be happy to connect and answer any questions you may have about the program.</p><p>We can connect in whatever format works best for you, whether over Zoom, by email, or in person if you're nearby. Feel free to ask about the MSTI curriculum, student life, projects, the GIX community, living in the Seattle/Bellevue area, or anything else you're curious about.</p><p>Please feel free to send me a few times that work for you, or let me know if you'd prefer to ask questions over email instead.</p><p>Looking forward to connecting with you!</p><p>Best,</p>${emailSignature(amb)}</div>`;
+}
+
+function sendEmail(reqId, type) {
+  const r = requests.find(x => x.id === reqId);
+  if (!r) return;
+
+  const isFollowup = type === 'followup';
+  const actionLabel = isFollowup ? "Follow-up email sent by ambassador" : "Intro email sent by ambassador";
+
+  if (!isFollowup && r.status === "Pending Assignment") {
+    r.status = "Intro Sent";
+    r.statusUpdated = today();
+  }
+
+  r.activityLog.push({ date: today(), action: actionLabel, type: "status" });
+  document.getElementById("email-modal-backdrop").style.display = "none";
+
+  toast(`✓ Email sent to ${r.studentName}`, "success");
+  renderDashboard();
+}
+
+// ─────────────────────────────────────────
+// Timeline toggle
+// ─────────────────────────────────────────
+
+function toggleTimeline(reqId, btn) {
+  const tl = document.getElementById(`timeline-${reqId}`);
+  const isOpen = tl.classList.contains('open');
+  tl.classList.toggle('open', !isOpen);
+  btn.innerHTML = isOpen
+    ? `<i class="fa-solid fa-clock-rotate-left" style="font-size:11px"></i> Activity (${requests.find(r=>r.id===reqId).activityLog.length})`
+    : `<i class="fa-solid fa-chevron-up" style="font-size:11px"></i> Hide activity`;
+}
+
+// ─────────────────────────────────────────
+// Boot
+// ─────────────────────────────────────────
+
+populateSwitcher();
+</script>
+</body>
+</html>

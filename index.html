@@ -1,0 +1,2163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MSTI Coffee Chat — Coordinator Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <style>
+    :root {
+      --purple: #4b2e83;
+      --purple-light: #6b46b0;
+      --gold: #b7a57a;
+      --bg: #f0f2fb;
+      --surface: #ffffff;
+      --border: #e8eaf2;
+      --text: #1a1a2e;
+      --muted: #6b7280;
+      --danger: #dc2626;
+      --warning: #d97706;
+      --success: #16a34a;
+      --info: #2563eb;
+      --radius: 14px;
+      --sidebar-w: 240px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── App shell ── */
+    .app-shell {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: var(--sidebar-w);
+      flex-shrink: 0;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      z-index: 100;
+      box-shadow: 2px 0 12px rgba(75,46,131,.06);
+    }
+
+    .sidebar-brand {
+      padding: 24px 20px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .sidebar-brand img { height: 38px; max-width: 100%; object-fit: contain; }
+
+    .sidebar-brand-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      color: var(--muted);
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .sidebar-nav-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      color: var(--muted);
+      padding: 0 8px;
+      margin: 8px 0 6px;
+    }
+
+    .view-tab {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--muted);
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      width: 100%;
+      text-align: left;
+      transition: all .15s;
+    }
+
+    .view-tab:hover { background: var(--bg); color: var(--text); }
+    .view-tab.active { background: var(--purple); color: white; }
+    .view-tab .tab-icon { font-size: 16px; width: 20px; text-align: center; flex-shrink: 0; }
+
+    .sidebar-footer {
+      padding: 16px 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    .coordinator-chip {
+      background: #f0ebff;
+      color: var(--purple);
+      border-radius: 20px;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* ── Main area ── */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .main-topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 28px;
+      height: 58px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 90;
+    }
+
+    .main-topbar-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .main-topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    /* ── Layout ── */
+    .container {
+      max-width: none;
+      margin: 0 auto;
+      padding: 28px;
+      width: 100%;
+    }
+
+    /* ── Stats ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 22px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      box-shadow: 0 2px 12px rgba(75,46,131,.07);
+    }
+
+    .stat-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      background: #ede8f8;
+      color: var(--purple);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .stat-value {
+      font-size: 34px;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .stat-sub {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .stat-card.accent-red    .stat-value { color: var(--danger); }
+    .stat-card.accent-amber  .stat-value { color: var(--warning); }
+    .stat-card.accent-green  .stat-value { color: var(--success); }
+    .stat-card.accent-purple .stat-value { color: var(--purple); }
+
+    /* ── Toolbar ── */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding-bottom: 14px;
+    }
+
+    .filter-tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 4px;
+    }
+
+    .tab {
+      padding: 6px 14px;
+      font-size: 13px;
+      border: none;
+      background: transparent;
+      border-radius: 6px;
+      cursor: pointer;
+      color: var(--muted);
+      font-weight: 500;
+      transition: all .15s;
+    }
+
+    .tab:hover { background: var(--bg); color: var(--text); }
+    .tab.active { background: var(--purple); color: white; }
+
+    .toolbar-right {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    input[type="search"] {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 7px 12px;
+      font-size: 13px;
+      outline: none;
+      width: 260px;
+      background: var(--surface);
+    }
+
+    input[type="search"]:focus { border-color: var(--purple); }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      border-radius: var(--radius);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      transition: all .15s;
+    }
+
+    .btn-primary { background: var(--purple); color: white; }
+    .btn-primary:hover { background: #3a2364; }
+    .btn-outline { background: white; color: var(--text); border: 1px solid var(--border); }
+    .btn-outline:hover { background: var(--bg); }
+    .btn-sm { padding: 4px 10px; font-size: 12px; }
+    .btn-danger { background: #fef2f2; color: var(--danger); border: 1px solid #fecaca; }
+    .btn-danger:hover { background: #fee2e2; }
+    .btn-success { background: #f0fdf4; color: var(--success); border: 1px solid #bbf7d0; }
+    .btn-success:hover { background: #dcfce7; }
+
+    /* ── Table ── */
+    .table-wrap {
+      background: var(--surface);
+      border-radius: var(--radius);
+      overflow-x: auto;
+      box-shadow: 0 2px 12px rgba(75,46,131,.07);
+    }
+
+    .table-wrap table {
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    thead th {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 10px;
+      text-align: left;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .7px;
+      color: #b0b3c6;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background .1s;
+    }
+
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #f8f7ff; }
+
+    td { padding: 14px 10px; vertical-align: middle; }
+
+    .student-cell {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .student-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #ede8f8;
+      color: var(--purple);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .student-info { display: flex; flex-direction: column; gap: 2px; }
+    .student-name { font-weight: 600; }
+    .student-email { color: var(--muted); font-size: 11px; }
+
+    .date-cell { color: var(--muted); white-space: nowrap; }
+
+    .interest-badge {
+      display: inline-block;
+      background: #ede9fe;
+      color: #5b21b6;
+      font-size: 11px;
+      font-weight: 500;
+      padding: 2px 8px;
+      border-radius: 99px;
+    }
+
+    .pref-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 99px;
+      margin-top: 4px;
+    }
+    .pref-student { background: #dbeafe; color: #1e40af; }
+    .pref-alumni  { background: #fef3c7; color: #92400e; }
+    .pref-any     { background: #f3f4f6; color: #6b7280; }
+
+    /* ── Status Pills ── */
+    .status {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 99px;
+      white-space: nowrap;
+    }
+
+    .status::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+      flex-shrink: 0;
+    }
+
+    .status-pending    { background: #fef3c7; color: #92400e; }
+    .status-intro      { background: #dbeafe; color: #1e40af; }
+    .status-confirmed  { background: #ede9fe; color: #5b21b6; }
+    .status-completed  { background: #d1fae5; color: #065f46; }
+    .status-feedback   { background: #e0f2fe; color: #0369a1; }
+    .status-received   { background: #dcfce7; color: #166534; }
+    .status-stalled    { background: #fee2e2; color: #991b1b; }
+
+    /* ── Ambassador custom dropdown ── */
+    .amb-picker { position: relative; width: 210px; }
+
+    .amb-trigger {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 5px 10px;
+      font-size: 12px;
+      background: white;
+      color: var(--text);
+      cursor: pointer;
+      user-select: none;
+      gap: 6px;
+      position: relative;
+    }
+
+    .amb-trigger:hover { border-color: #a78bfa; }
+    .amb-trigger.open  { border-color: var(--purple); border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+
+    .amb-trigger-text { color: var(--muted); }
+    .amb-trigger-text.chosen { color: var(--text); font-weight: 500; }
+    .amb-chevron { font-size: 10px; color: var(--muted); transition: transform .15s; position: absolute; right: 10px; }
+    .amb-trigger.open .amb-chevron { transform: rotate(180deg); }
+
+    .amb-panel {
+      display: none;
+      position: fixed;
+      background: white;
+      border: 1px solid var(--purple);
+      border-radius: 0 0 6px 6px;
+      z-index: 9999;
+      box-shadow: 0 4px 12px rgba(0,0,0,.12);
+      min-width: 210px;
+    }
+
+    .amb-panel.open { display: block; }
+
+    .amb-tab-row {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .amb-tab {
+      flex: 1;
+      padding: 6px 0;
+      font-size: 11px;
+      font-weight: 600;
+      text-align: center;
+      border: none;
+      background: #f9f9f9;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all .15s;
+      letter-spacing: .2px;
+    }
+
+    .amb-tab:first-child { border-right: 1px solid var(--border); border-bottom-left-radius: 0; }
+    .amb-tab.active { background: var(--purple); color: white; }
+
+    .amb-list { max-height: 160px; overflow-y: auto; }
+
+    .amb-option {
+      padding: 8px 12px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .amb-option:last-child { border-bottom: none; }
+    .amb-option:hover { background: #f5f3ff; }
+    .amb-option-name { font-weight: 500; color: var(--text); }
+    .amb-option-cohort { font-size: 11px; color: var(--muted); }
+
+    .amb-assigned {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .amb-name { font-weight: 500; font-size: 13px; }
+    .amb-cohort { color: var(--muted); font-size: 11px; }
+
+    /* ── Kebab menu ── */
+    .kebab-wrap { position: relative; display: flex; justify-content: flex-end; }
+
+    .kebab-btn {
+      background: none;
+      border: none;
+      width: 30px; height: 30px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1;
+      transition: color .12s;
+      border-radius: 6px;
+    }
+    .kebab-btn:hover { background: var(--bg); color: var(--text); }
+
+    .kebab-menu {
+      display: none;
+      position: fixed;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0,0,0,.12);
+      min-width: 190px;
+      z-index: 9999;
+      overflow: hidden;
+    }
+    .kebab-menu.open { display: block; }
+
+    .kebab-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 9px 14px;
+      font-size: 13px;
+      cursor: pointer;
+      color: var(--text);
+      white-space: nowrap;
+      transition: background .1s;
+    }
+    .kebab-item:hover { background: var(--bg); }
+    .kebab-item .ki-icon { font-size: 14px; color: var(--muted); flex-shrink: 0; }
+    .kebab-item.danger { color: var(--danger); }
+    .kebab-item.danger .ki-icon { color: var(--danger); }
+
+    .kebab-divider { height: 1px; background: var(--border); margin: 4px 0; }
+
+    /* ── Days ago ── */
+    .stalled-flag {
+      font-size: 11px;
+      color: var(--danger);
+      font-weight: 600;
+    }
+
+    /* ── Empty state ── */
+    .empty-row td {
+      text-align: center;
+      padding: 48px;
+      color: var(--muted);
+    }
+
+    /* ── Toast ── */
+    #toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      z-index: 9999;
+    }
+
+    .toast {
+      background: #1f2937;
+      color: white;
+      padding: 12px 18px;
+      border-radius: var(--radius);
+      font-size: 13px;
+      box-shadow: 0 4px 16px rgba(0,0,0,.2);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: slideIn .2s ease;
+      max-width: 340px;
+    }
+
+    .toast.success { border-left: 4px solid var(--success); }
+    .toast.info    { border-left: 4px solid var(--info); }
+    .toast.warning { border-left: 4px solid var(--warning); }
+
+    @keyframes slideIn {
+      from { transform: translateX(60px); opacity: 0; }
+      to   { transform: translateX(0);    opacity: 1; }
+    }
+
+    /* ── Modal ── */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      backdrop-filter: blur(2px);
+    }
+
+    .modal {
+      background: white;
+      border-radius: 12px;
+      padding: 28px;
+      width: 540px;
+      max-width: 95vw;
+      box-shadow: 0 20px 60px rgba(0,0,0,.2);
+      animation: popIn .2s ease;
+    }
+
+    @keyframes popIn {
+      from { transform: scale(.96); opacity: 0; }
+      to   { transform: scale(1);   opacity: 1; }
+    }
+
+    .modal h2 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 4px;
+      color: var(--purple);
+    }
+
+    .modal-sub {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 20px;
+    }
+
+    .email-preview {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px 24px;
+      font-size: 13px;
+      line-height: 1.75;
+      color: var(--text);
+      max-height: 380px;
+      overflow-y: auto;
+      font-family: Arial, sans-serif;
+    }
+
+    .email-preview p { margin: 0 0 12px; }
+    .email-preview ul { margin: 0 0 12px 20px; padding: 0; }
+    .email-preview ul ul { margin: 4px 0 4px 20px; }
+    .email-preview li { margin-bottom: 2px; }
+    .email-preview a { color: #4b2e83; }
+    .email-preview .sig-divider { border: none; border-top: 1px solid #ccc; margin: 16px 0 10px; width: 200px; }
+    .email-preview .sig-block { font-size: 12px; line-height: 1.6; color: #333; }
+    .email-preview .sig-links a { color: #4b2e83; text-decoration: none; }
+    .email-preview .sig-links a:hover { text-decoration: underline; }
+    .email-preview .sig-logo { margin-top: 10px; height: 48px; display: block; }
+    .email-preview .sig-social { display: flex; gap: 14px; margin-top: 12px; align-items: center; }
+    .email-preview .social-icon {
+      color: #000; font-size: 20px; text-decoration: none; line-height: 1;
+    }
+    .email-preview .social-icon:hover { color: #444; }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      color: var(--muted);
+      margin-bottom: 8px;
+      margin-top: 16px;
+    }
+
+    /* ── Pagination ── */
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      border-top: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .pagination-controls { display: flex; gap: 4px; align-items: center; }
+
+    .page-btn {
+      min-width: 32px; height: 32px;
+      padding: 0 8px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: white;
+      font-size: 13px;
+      cursor: pointer;
+      color: var(--text);
+      transition: all .15s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .page-btn:hover:not(:disabled) { background: var(--bg); border-color: #aaa; }
+    .page-btn.active { background: var(--purple); color: white; border-color: var(--purple); }
+    .page-btn:disabled { opacity: 0.4; cursor: default; }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 99px; }
+
+    /* ── View nav (hidden — replaced by sidebar) ── */
+    .view-nav { display: none; }
+
+    /* ── Detail panel ── */
+    .detail-panel {
+      position: fixed;
+      right: -420px;
+      top: 0;
+      height: 100vh;
+      width: 400px;
+      background: var(--surface);
+      border-left: 1px solid var(--border);
+      box-shadow: -4px 0 20px rgba(0,0,0,.1);
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      transition: right .25s ease;
+      overflow: hidden;
+    }
+
+    .detail-panel.open { right: 0; }
+
+    .detail-panel-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .detail-panel-header-info { flex: 1; min-width: 0; }
+
+    .detail-panel-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .detail-panel-email {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .detail-close {
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: var(--muted);
+      line-height: 1;
+      padding: 2px 6px;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+
+    .detail-close:hover { background: var(--bg); color: var(--text); }
+
+    .detail-panel-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 20px;
+    }
+
+    .detail-field { margin-bottom: 14px; }
+    .detail-field-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .7px;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .detail-section-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .7px;
+      color: var(--muted);
+      margin: 20px 0 8px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .detail-note-textarea {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 13px;
+      resize: vertical;
+      min-height: 70px;
+      font-family: inherit;
+      outline: none;
+    }
+
+    .detail-note-textarea:focus { border-color: var(--purple); }
+
+    /* ── Log entries ── */
+    .log-entry {
+      padding: 8px 10px;
+      border-left: 3px solid var(--border);
+      margin-bottom: 8px;
+      border-radius: 0 4px 4px 0;
+      background: #fafafa;
+    }
+
+    .log-entry.type-created { border-left-color: #7c3aed; background: #faf5ff; }
+    .log-entry.type-assigned { border-left-color: var(--info); background: #eff6ff; }
+    .log-entry.type-status { border-left-color: var(--success); background: #f0fdf4; }
+    .log-entry.type-note { border-left-color: var(--warning); background: #fffbeb; }
+
+    .log-action { font-size: 12px; font-weight: 500; color: var(--text); }
+    .log-date { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+    /* ── Ambassadors view ── */
+    .amb-section-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      color: var(--muted);
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+
+    .amb-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .amb-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      box-shadow: 0 2px 12px rgba(75,46,131,.07);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .amb-card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .amb-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--purple);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .amb-card-name { font-size: 15px; font-weight: 700; }
+    .amb-card-cohort { font-size: 12px; color: var(--muted); }
+
+    .amb-type-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 99px;
+      width: fit-content;
+    }
+
+    .amb-type-student { background: #dbeafe; color: #1e40af; }
+    .amb-type-alumni  { background: #fef3c7; color: #92400e; }
+
+    .amb-card-info { font-size: 12px; color: var(--muted); display: flex; flex-direction: column; gap: 3px; }
+    .amb-card-info a { color: var(--purple); text-decoration: none; }
+    .amb-card-info a:hover { text-decoration: underline; }
+
+    .amb-card-stats {
+      display: flex;
+      gap: 12px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+    }
+
+    .amb-stat {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      flex: 1;
+      text-align: center;
+    }
+
+    .amb-stat-val { font-size: 20px; font-weight: 700; color: var(--purple); }
+    .amb-stat-lbl { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+
+    /* ── Form inputs ── */
+    .form-group { margin-bottom: 14px; }
+    .form-label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 5px; color: var(--text); }
+    .form-input {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+    }
+    .form-input:focus { border-color: var(--purple); }
+    .form-textarea {
+      resize: vertical;
+      min-height: 70px;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .toolbar { flex-direction: column; align-items: flex-start; }
+      .amb-grid { grid-template-columns: 1fr; }
+      .detail-panel { width: 100%; right: -100%; }
+    }
+  </style>
+</head>
+<body>
+<div class="app-shell">
+
+<!-- ── Sidebar ── -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <img src="images/gix_logo.png" alt="GIX">
+  </div>
+  <nav class="sidebar-nav">
+    <div class="sidebar-nav-label">Menu</div>
+    <button class="view-tab active" onclick="switchView('requests', this)">
+      <span class="tab-icon"><i class="fa-solid fa-mug-hot"></i></span> Requests
+    </button>
+    <button class="view-tab" onclick="switchView('ambassadors', this)">
+      <span class="tab-icon"><i class="fa-solid fa-users"></i></span> Ambassadors
+    </button>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="coordinator-chip"><i class="fa-solid fa-clipboard-list"></i> Coordinator View</div>
+  </div>
+</aside>
+
+<!-- ── Main ── -->
+<div class="main">
+<div class="main-topbar">
+  <div class="main-topbar-title" id="main-title">Coffee Chat Program</div>
+  <div class="main-topbar-right">
+    <span>Phase 1 Prototype · Mock Data</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- View nav (hidden — navigation moved to sidebar) -->
+  <div class="view-nav">
+    <button class="view-tab active" onclick="switchView('requests', this)">Requests</button>
+    <button class="view-tab" onclick="switchView('ambassadors', this)">Ambassadors</button>
+  </div>
+
+  <!-- ═══ REQUESTS VIEW ═══ -->
+  <div id="view-requests">
+
+    <!-- Stats -->
+    <div class="stats-grid" id="stats-grid"></div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="filter-tabs" id="filter-tabs">
+        <button class="tab active" data-filter="all">All Requests</button>
+        <button class="tab" data-filter="pending">Pending Assignment</button>
+        <button class="tab" data-filter="active">In Progress</button>
+        <button class="tab" data-filter="stalled">Stalled</button>
+        <button class="tab" data-filter="completed">Completed</button>
+      </div>
+      <div class="toolbar-right">
+        <input type="search" id="search" placeholder="Search student or ambassador…" />
+        <button class="btn btn-outline btn-sm" onclick="exportCSV()">↓ Export CSV</button>
+        <button class="btn btn-primary btn-sm" onclick="openAddRequestModal()">+ Add Request</button>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th>Submitted</th>
+            <th>Program Interest</th>
+            <th>Prefers</th>
+            <th>Assigned Ambassador</th>
+            <th>Status</th>
+            <th>Days in Status</th>
+            <th style="text-align:left;color:#b0b3c6">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="request-table"></tbody>
+      </table>
+      <div class="pagination" id="pagination"></div>
+    </div>
+
+  </div><!-- /view-requests -->
+
+  <!-- ═══ AMBASSADORS VIEW ═══ -->
+  <div id="view-ambassadors" style="display:none">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div>
+        <h2 style="font-size:18px;font-weight:700">Ambassadors</h2>
+        <p style="font-size:13px;color:var(--muted);margin-top:2px" id="amb-subtitle"></p>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="openAddAmbassadorModal()">+ Add Ambassador</button>
+    </div>
+    <div class="amb-section-label">MSTI Students</div>
+    <div class="amb-grid" id="amb-grid-students"></div>
+    <div class="amb-section-label" style="margin-top:24px">Alumni</div>
+    <div class="amb-grid" id="amb-grid-alumni"></div>
+  </div><!-- /view-ambassadors -->
+
+</div><!-- /container -->
+</div><!-- /main -->
+</div><!-- /app-shell -->
+
+<!-- Detail panel -->
+<div class="detail-panel" id="detail-panel">
+  <div class="detail-panel-header">
+    <div class="detail-panel-header-info">
+      <div class="detail-panel-name" id="dp-name"></div>
+      <div class="detail-panel-email" id="dp-email"></div>
+    </div>
+    <button class="detail-close" onclick="closeDetailPanel()">×</button>
+  </div>
+  <div class="detail-panel-body" id="dp-body"></div>
+</div>
+
+<!-- Toast container -->
+<div id="toast-container"></div>
+
+<!-- Email / intro modal -->
+<div id="modal-backdrop" class="modal-backdrop" style="display:none" onclick="closeModal(event)">
+  <div class="modal" id="modal-box">
+    <h2 id="modal-title">Send Intro Email</h2>
+    <p class="modal-sub" id="modal-sub"></p>
+    <p class="section-label">Email Preview</p>
+    <div class="email-preview" id="email-preview"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" id="modal-confirm-btn">Send Email</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Request modal -->
+<div id="add-request-backdrop" class="modal-backdrop" style="display:none" onclick="closeAddRequestModal(event)">
+  <div class="modal" style="width:480px">
+    <h2>Add New Request</h2>
+    <p class="modal-sub">Create a coffee chat request on behalf of a student.</p>
+    <div class="form-group">
+      <label class="form-label">Student Name <span style="color:var(--danger)">*</span></label>
+      <input type="text" class="form-input" id="ar-name" placeholder="Full name" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Student Email <span style="color:var(--danger)">*</span></label>
+      <input type="email" class="form-input" id="ar-email" placeholder="student@email.com" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Program Interest</label>
+      <select class="form-input" id="ar-interest">
+        <option value="Software Engineering">Software Engineering</option>
+        <option value="Product Management">Product Management</option>
+        <option value="Data &amp; AI">Data &amp; AI</option>
+        <option value="UX / Design">UX / Design</option>
+        <option value="Cybersecurity">Cybersecurity</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Ambassador Preference</label>
+      <select class="form-input" id="ar-pref">
+        <option value="student">Student</option>
+        <option value="alumni">Alumni</option>
+        <option value="any">No preference</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes (optional)</label>
+      <textarea class="form-input form-textarea" id="ar-notes" placeholder="Any context for the coordinator…"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeAddRequestModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="submitAddRequest()">Add Request</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Ambassador modal -->
+<div id="add-amb-backdrop" class="modal-backdrop" style="display:none" onclick="closeAddAmbassadorModal(event)">
+  <div class="modal" style="width:460px">
+    <h2>Add Ambassador</h2>
+    <p class="modal-sub">Register a new student or alumni ambassador.</p>
+    <div class="form-group">
+      <label class="form-label">Full Name <span style="color:var(--danger)">*</span></label>
+      <input type="text" class="form-input" id="aa-name" placeholder="Full name" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Email <span style="color:var(--danger)">*</span></label>
+      <input type="email" class="form-input" id="aa-email" placeholder="uw@uw.edu" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Cohort</label>
+      <input type="text" class="form-input" id="aa-cohort" placeholder="e.g. MSTI '25" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Type</label>
+      <select class="form-input" id="aa-type">
+        <option value="student">Student</option>
+        <option value="alumni">Alumni</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">LinkedIn URL</label>
+      <input type="text" class="form-input" id="aa-linkedin" placeholder="linkedin.com/in/yourname" />
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeAddAmbassadorModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="submitAddAmbassador()">Add Ambassador</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────
+// Mock Data
+// ─────────────────────────────────────────
+
+const AMBASSADORS = [
+  { id: 1, name: "Sarah Kim",       email: "skim@uw.edu",      cohort: "MSTI '24",   type: "student", linkedin: "linkedin.com/in/sarahkim" },
+  { id: 2, name: "Marcus Chen",     email: "mchen@uw.edu",     cohort: "MSTI '23",   type: "student", linkedin: "linkedin.com/in/marcuschen" },
+  { id: 3, name: "Priya Patel",     email: "ppatel@uw.edu",    cohort: "MSTI '24",   type: "student", linkedin: "linkedin.com/in/priyapatel" },
+  { id: 4, name: "James O'Brien",   email: "jobrien@uw.edu",   cohort: "Alumni '22", type: "alumni",  linkedin: "linkedin.com/in/jamesobrien" },
+  { id: 5, name: "Leila Nazari",    email: "lnazari@uw.edu",   cohort: "MSTI '24",   type: "student", linkedin: "linkedin.com/in/leilanazari" },
+  { id: 6, name: "David Park",      email: "dpark@uw.edu",     cohort: "Alumni '23", type: "alumni",  linkedin: "linkedin.com/in/davidpark" },
+];
+
+const STATUS_ORDER = [
+  "Pending Assignment",
+  "Intro Sent",
+  "Ambassador Confirmed",
+  "Chat Completed",
+  "Feedback Sent",
+  "Feedback Received",
+];
+
+const STATUS_CLASSES = {
+  "Pending Assignment":   "status-pending",
+  "Intro Sent":           "status-intro",
+  "Ambassador Confirmed": "status-confirmed",
+  "Chat Completed":       "status-completed",
+  "Feedback Sent":        "status-feedback",
+  "Feedback Received":    "status-received",
+  "Stalled":              "status-stalled",
+};
+
+function daysAgo(dateStr) {
+  const d = new Date(dateStr);
+  return Math.floor((Date.now() - d) / 86400000);
+}
+
+function fmt(dateStr) {
+  return new Date(dateStr).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+}
+
+// ─────────────────────────────────────────
+// Requests data (mock)
+// ─────────────────────────────────────────
+
+let requests = [
+  {
+    id: 1,
+    studentName: "Alex Johnson",
+    studentEmail: "alex.johnson@gmail.com",
+    submitted: "2026-06-18",
+    interest: "Software Engineering",
+    preferredType: "student",
+    ambId: null,
+    status: "Pending Assignment",
+    statusUpdated: "2026-06-18",
+    notes: "",
+    activityLog: [
+      { date: "2026-06-18", action: "Request submitted", type: "created" },
+    ],
+  },
+  {
+    id: 2,
+    studentName: "Maria Garcia",
+    studentEmail: "mgarcia@outlook.com",
+    submitted: "2026-06-16",
+    interest: "Product Management",
+    preferredType: "any",
+    ambId: 1,
+    status: "Intro Sent",
+    statusUpdated: "2026-06-17",
+    notes: "",
+    activityLog: [
+      { date: "2026-06-16", action: "Request submitted", type: "created" },
+      { date: "2026-06-17", action: "Ambassador assigned: Sarah Kim", type: "assigned" },
+      { date: "2026-06-17", action: "Intro email sent", type: "status" },
+    ],
+  },
+  {
+    id: 3,
+    studentName: "Tyler Brooks",
+    studentEmail: "tyler.b@yahoo.com",
+    submitted: "2026-06-14",
+    interest: "Data & AI",
+    preferredType: "alumni",
+    ambId: 3,
+    status: "Ambassador Confirmed",
+    statusUpdated: "2026-06-15",
+    notes: "",
+    activityLog: [
+      { date: "2026-06-14", action: "Request submitted", type: "created" },
+      { date: "2026-06-14", action: "Ambassador assigned: Priya Patel", type: "assigned" },
+      { date: "2026-06-14", action: "Intro email sent", type: "status" },
+      { date: "2026-06-15", action: "Ambassador confirmed availability", type: "status" },
+    ],
+  },
+  {
+    id: 4,
+    studentName: "Aisha Okonkwo",
+    studentEmail: "aokonkwo@gmail.com",
+    submitted: "2026-06-10",
+    interest: "UX / Design",
+    preferredType: "student",
+    ambId: 2,
+    status: "Chat Completed",
+    statusUpdated: "2026-06-13",
+    notes: "Student mentioned interest in the Design track specifically.",
+    activityLog: [
+      { date: "2026-06-10", action: "Request submitted", type: "created" },
+      { date: "2026-06-10", action: "Ambassador assigned: Marcus Chen", type: "assigned" },
+      { date: "2026-06-11", action: "Intro email sent", type: "status" },
+      { date: "2026-06-12", action: "Ambassador confirmed availability", type: "status" },
+      { date: "2026-06-13", action: "Chat completed", type: "status" },
+      { date: "2026-06-13", action: "Note: Student interested in Design track", type: "note" },
+    ],
+  },
+  {
+    id: 5,
+    studentName: "Nathan Wu",
+    studentEmail: "nwu2026@uw.edu",
+    submitted: "2026-06-05",
+    interest: "Cybersecurity",
+    preferredType: "alumni",
+    ambId: 4,
+    status: "Feedback Sent",
+    statusUpdated: "2026-06-12",
+    notes: "",
+    activityLog: [
+      { date: "2026-06-05", action: "Request submitted", type: "created" },
+      { date: "2026-06-06", action: "Ambassador assigned: James O'Brien", type: "assigned" },
+      { date: "2026-06-07", action: "Intro email sent", type: "status" },
+      { date: "2026-06-09", action: "Ambassador confirmed availability", type: "status" },
+      { date: "2026-06-11", action: "Chat completed", type: "status" },
+      { date: "2026-06-12", action: "Feedback form sent to student", type: "status" },
+    ],
+  },
+  {
+    id: 6,
+    studentName: "Sophie Tremblay",
+    studentEmail: "stremblay@gmail.com",
+    submitted: "2026-05-30",
+    interest: "Product Management",
+    preferredType: "any",
+    ambId: 5,
+    status: "Feedback Received",
+    statusUpdated: "2026-06-08",
+    notes: "Very positive feedback — student said it helped clarify her decision.",
+    activityLog: [
+      { date: "2026-05-30", action: "Request submitted", type: "created" },
+      { date: "2026-05-31", action: "Ambassador assigned: Leila Nazari", type: "assigned" },
+      { date: "2026-06-01", action: "Intro email sent", type: "status" },
+      { date: "2026-06-02", action: "Ambassador confirmed availability", type: "status" },
+      { date: "2026-06-05", action: "Chat completed", type: "status" },
+      { date: "2026-06-06", action: "Feedback form sent to student", type: "status" },
+      { date: "2026-06-08", action: "Feedback received", type: "status" },
+      { date: "2026-06-08", action: "Note: Very positive feedback", type: "note" },
+    ],
+  },
+  {
+    id: 7,
+    studentName: "Raj Mehta",
+    studentEmail: "rajmehta@gmail.com",
+    submitted: "2026-06-08",
+    interest: "Software Engineering",
+    preferredType: "alumni",
+    ambId: 6,
+    status: "Intro Sent",
+    statusUpdated: "2026-06-09",
+    notes: "",
+    activityLog: [
+      { date: "2026-06-08", action: "Request submitted", type: "created" },
+      { date: "2026-06-08", action: "Ambassador assigned: David Park", type: "assigned" },
+      { date: "2026-06-09", action: "Intro email sent", type: "status" },
+    ],
+  },
+  {
+    id: 8,
+    studentName: "Chloe Dubois",
+    studentEmail: "cdubois@icloud.com",
+    submitted: "2026-06-01",
+    interest: "Data & AI",
+    preferredType: "student",
+    ambId: 2,
+    status: "Intro Sent",
+    statusUpdated: "2026-06-02",
+    notes: "",
+    activityLog: [
+      { date: "2026-06-01", action: "Request submitted", type: "created" },
+      { date: "2026-06-01", action: "Ambassador assigned: Marcus Chen", type: "assigned" },
+      { date: "2026-06-02", action: "Intro email sent", type: "status" },
+    ],
+  },
+  {
+    id: 9,
+    studentName: "Ethan Park",
+    studentEmail: "ethanp@gmail.com",
+    submitted: "2026-06-17",
+    interest: "Cybersecurity",
+    preferredType: "alumni",
+    ambId: null,
+    status: "Pending Assignment",
+    statusUpdated: "2026-06-17",
+    notes: "",
+    activityLog: [
+      { date: "2026-06-17", action: "Request submitted", type: "created" },
+    ],
+  },
+  {
+    id: 10,
+    studentName: "Fatima Al-Rashid",
+    studentEmail: "falrashid@hotmail.com",
+    submitted: "2026-06-11",
+    interest: "UX / Design",
+    preferredType: "any",
+    ambId: 3,
+    status: "Chat Completed",
+    statusUpdated: "2026-06-14",
+    notes: "",
+    activityLog: [
+      { date: "2026-06-11", action: "Request submitted", type: "created" },
+      { date: "2026-06-11", action: "Ambassador assigned: Priya Patel", type: "assigned" },
+      { date: "2026-06-12", action: "Intro email sent", type: "status" },
+      { date: "2026-06-13", action: "Ambassador confirmed availability", type: "status" },
+      { date: "2026-06-14", action: "Chat completed", type: "status" },
+    ],
+  },
+];
+
+let nextId = 11;
+let activeFilter = "all";
+let searchQuery = "";
+let currentPage = 1;
+const PAGE_SIZE = 8;
+
+// ─────────────────────────────────────────
+// Stalled detection
+// ─────────────────────────────────────────
+
+function isStalled(req) {
+  if (["Feedback Received", "Pending Assignment"].includes(req.status)) return false;
+  return daysAgo(req.statusUpdated) >= 5;
+}
+
+function effectiveStatus(req) {
+  return isStalled(req) ? "Stalled" : req.status;
+}
+
+// ─────────────────────────────────────────
+// Stats
+// ─────────────────────────────────────────
+
+function renderStats() {
+  const total = requests.length;
+  const pending = requests.filter(r => r.status === "Pending Assignment").length;
+  const stalled = requests.filter(r => isStalled(r)).length;
+  const received = requests.filter(r => r.status === "Feedback Received").length;
+  const completed = requests.filter(r =>
+    ["Chat Completed","Feedback Sent","Feedback Received"].includes(r.status)).length;
+  const feedbackRate = completed > 0 ? Math.round((received / completed) * 100) : 0;
+
+  const el = document.getElementById("stats-grid");
+  el.innerHTML = `
+    <div class="stat-card accent-purple">
+      <div class="stat-icon"><i class="fa-solid fa-mug-hot"></i></div>
+      <div class="stat-label">Total Requests</div>
+      <div class="stat-value">${total}</div>
+      <div class="stat-sub">all time</div>
+    </div>
+    <div class="stat-card accent-amber">
+      <div class="stat-icon"><i class="fa-solid fa-user-clock"></i></div>
+      <div class="stat-label">Pending Assignment</div>
+      <div class="stat-value">${pending}</div>
+      <div class="stat-sub">need an ambassador</div>
+    </div>
+    <div class="stat-card accent-red">
+      <div class="stat-icon"><i class="fa-solid fa-circle-exclamation"></i></div>
+      <div class="stat-label">Stalled</div>
+      <div class="stat-value">${stalled}</div>
+      <div class="stat-sub">no update in 5+ days</div>
+    </div>
+    <div class="stat-card accent-green">
+      <div class="stat-icon"><i class="fa-solid fa-chart-simple"></i></div>
+      <div class="stat-label">Feedback Rate</div>
+      <div class="stat-value">${feedbackRate}%</div>
+      <div class="stat-sub">${received} of ${completed} completed</div>
+    </div>
+  `;
+}
+
+// ─────────────────────────────────────────
+// Filtering
+// ─────────────────────────────────────────
+
+function filteredRequests() {
+  return requests.filter(r => {
+    const es = effectiveStatus(r);
+    const inProgress = ["Intro Sent","Ambassador Confirmed","Chat Completed","Feedback Sent"].includes(r.status);
+
+    let passFilter = true;
+    if (activeFilter === "pending")   passFilter = r.status === "Pending Assignment";
+    else if (activeFilter === "active")    passFilter = inProgress && !isStalled(r);
+    else if (activeFilter === "stalled")   passFilter = isStalled(r);
+    else if (activeFilter === "completed") passFilter = r.status === "Feedback Received";
+
+    const q = searchQuery.toLowerCase();
+    const passSearch = !q ||
+      r.studentName.toLowerCase().includes(q) ||
+      r.studentEmail.toLowerCase().includes(q) ||
+      (r.ambId && AMBASSADORS.find(a=>a.id===r.ambId)?.name.toLowerCase().includes(q));
+
+    return passFilter && passSearch;
+  }).sort((a, b) => new Date(b.submitted) - new Date(a.submitted));
+}
+
+// ─────────────────────────────────────────
+// Table render
+// ─────────────────────────────────────────
+
+function ambOptions(selectedId) {
+  const opts = AMBASSADORS.map(a =>
+    `<option value="${a.id}" ${a.id===selectedId?'selected':''}>${a.name} (${a.cohort})</option>`
+  ).join('');
+  return `<select class="amb-select" onchange="assignAmbassador(${null}, this)">
+    <option value="">— Assign ambassador —</option>
+    ${opts}
+  </select>`;
+}
+
+function renderTable() {
+  const tbody = document.getElementById("request-table");
+  const all = filteredRequests();
+  const totalPages = Math.max(1, Math.ceil(all.length / PAGE_SIZE));
+  if (currentPage > totalPages) currentPage = totalPages;
+  const rows = all.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
+  if (all.length === 0) {
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="8">No requests match this filter.</td></tr>`;
+    document.getElementById("pagination").innerHTML = '';
+    return;
+  }
+
+  tbody.innerHTML = rows.map(r => {
+    const amb = r.ambId ? AMBASSADORS.find(a => a.id === r.ambId) : null;
+    const es = effectiveStatus(r);
+    const days = daysAgo(r.statusUpdated);
+    const stalledFlag = isStalled(r) ? `<span class="stalled-flag" style="margin-left:6px">⚠ follow up!</span>` : '';
+
+    const ambCell = amb
+      ? `<div class="amb-assigned">
+           <span class="amb-name">${amb.name}</span>
+           <span class="amb-cohort">${amb.cohort} · ${amb.type === 'alumni' ? 'Alumni' : 'Student'}</span>
+         </div>`
+      : ambSelectHtml(r.id, r.preferredType);
+
+    const prefLabel = { student: '🎓 Student', alumni: '💼 Alumni', any: 'No preference' }[r.preferredType] || '—';
+    const prefClass = { student: 'pref-student', alumni: 'pref-alumni', any: 'pref-any' }[r.preferredType] || 'pref-any';
+
+    const actions = buildActions(r, amb);
+
+    const avatarInitials = r.studentName.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+
+    return `<tr data-id="${r.id}" onclick="openDetailPanel(${r.id})" style="cursor:pointer">
+      <td>
+        <div class="student-cell">
+          <div class="student-avatar">${avatarInitials}</div>
+          <div class="student-info">
+            <span class="student-name">${r.studentName}</span>
+            <span class="student-email">${r.studentEmail}</span>
+          </div>
+        </div>
+      </td>
+      <td class="date-cell">${fmt(r.submitted)}</td>
+      <td><span class="interest-badge">${r.interest}</span></td>
+      <td><span class="pref-badge ${prefClass}">${prefLabel}</span></td>
+      <td onclick="event.stopPropagation()">${ambCell}</td>
+      <td><span class="status ${STATUS_CLASSES[es]}">${es}</span></td>
+      <td>
+        <span style="font-size:12px;color:var(--muted)">${days}d</span>
+        ${stalledFlag}
+      </td>
+      <td onclick="event.stopPropagation()">${actions}</td>
+    </tr>`;
+  }).join('');
+
+  renderPagination(all.length, totalPages);
+}
+
+function renderPagination(total, totalPages) {
+  const el = document.getElementById("pagination");
+  if (totalPages <= 1) { el.innerHTML = ''; return; }
+
+  const start = (currentPage - 1) * PAGE_SIZE + 1;
+  const end = Math.min(currentPage * PAGE_SIZE, total);
+
+  let pages = '';
+  for (let i = 1; i <= totalPages; i++) {
+    pages += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
+  }
+
+  el.innerHTML = `
+    <span>${start}–${end} of ${total} requests</span>
+    <div class="pagination-controls">
+      <button class="page-btn" onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>‹</button>
+      ${pages}
+      <button class="page-btn" onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>›</button>
+    </div>
+  `;
+}
+
+function goToPage(page) {
+  currentPage = page;
+  renderTable();
+}
+
+function ambSelectHtml(reqId, preferredType) {
+  const activeTab = (preferredType === 'alumni') ? 'alumni' : 'student';
+  const listHtml = ambListHtml(reqId, activeTab);
+  return `<div class="amb-picker" id="amb-picker-${reqId}">
+    <div class="amb-trigger" onclick="toggleAmbPanel(${reqId}, event)">
+      <span class="amb-trigger-text" id="amb-label-${reqId}">— Assign —</span>
+      <span class="amb-chevron">▼</span>
+    </div>
+    <div class="amb-panel" id="amb-panel-${reqId}" onclick="event.stopPropagation()">
+      <div class="amb-tab-row">
+        <button class="amb-tab ${activeTab === 'student' ? 'active' : ''}"
+          onclick="switchAmbTab(${reqId}, 'student', this)">MSTI Student</button>
+        <button class="amb-tab ${activeTab === 'alumni' ? 'active' : ''}"
+          onclick="switchAmbTab(${reqId}, 'alumni', this)">Alumni</button>
+      </div>
+      <div class="amb-list" id="amb-list-${reqId}">${listHtml}</div>
+    </div>
+  </div>`;
+}
+
+function ambListHtml(reqId, type) {
+  return AMBASSADORS.filter(a => a.type === type).map(a => {
+    const safeName   = a.name.replace(/'/g, "\\'");
+    const safeCohort = a.cohort.replace(/'/g, "\\'");
+    return `<div class="amb-option" onclick="pickAmbassador(${reqId}, ${a.id}, '${safeName}', '${safeCohort}')">
+      <span class="amb-option-name">${a.name}</span>
+      <span class="amb-option-cohort">${a.cohort}</span>
+    </div>`;
+  }).join('');
+}
+
+function toggleAmbPanel(reqId, e) {
+  e.stopPropagation();
+  const trigger = document.querySelector(`#amb-picker-${reqId} .amb-trigger`);
+  const panel   = document.getElementById(`amb-panel-${reqId}`);
+  const isOpen  = panel.classList.contains('open');
+  closeAllAmbPanels();
+  if (!isOpen) {
+    const rect = trigger.getBoundingClientRect();
+    panel.style.top    = (rect.bottom) + 'px';
+    panel.style.left   = rect.left + 'px';
+    panel.style.width  = rect.width + 'px';
+    panel.classList.add('open');
+    trigger.classList.add('open');
+    document.body.appendChild(panel);
+  }
+}
+
+function closeAllAmbPanels() {
+  document.querySelectorAll('.amb-panel.open').forEach(p => p.classList.remove('open'));
+  document.querySelectorAll('.amb-trigger.open').forEach(t => t.classList.remove('open'));
+}
+
+function switchAmbTab(reqId, type, btn) {
+  btn.closest('.amb-tab-row').querySelectorAll('.amb-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(`amb-list-${reqId}`).innerHTML = ambListHtml(reqId, type);
+}
+
+function pickAmbassador(reqId, ambId, name, cohort) {
+  const req = requests.find(r => r.id === reqId);
+  req.ambId = ambId;
+  req.activityLog.push({ date: today(), action: `Ambassador assigned: ${name}`, type: "assigned" });
+  closeAllAmbPanels();
+  toast(`${name} assigned to ${req.studentName}`, 'success');
+  re();
+}
+
+document.addEventListener('click', () => { closeAllAmbPanels(); closeAllKebabs(); });
+
+function buildActions(r, amb) {
+  if (!r.ambId) {
+    return `<div class="kebab-wrap">
+      <button class="kebab-btn" onclick="toggleKebab(${r.id}, event, this)" aria-label="Actions">⋮</button>
+      <div class="kebab-menu" id="kebab-${r.id}" onclick="event.stopPropagation()">
+        <div class="kebab-item" onclick="closeAllKebabs();toast('Assign an ambassador first before taking action.','warning')">Assign an ambassador first <span class="ki-icon">⚠</span></div>
+      </div>
+    </div>`;
+  }
+
+  let items = [];
+
+  if (r.status === "Pending Assignment") {
+    items.push(`<div class="kebab-item" onclick="closeAllKebabs();openIntroModal(${r.id})">Send intro email <span class="ki-icon">✉</span></div>`);
+  }
+  if (r.status === "Intro Sent") {
+    items.push(`<div class="kebab-item" onclick="closeAllKebabs();openIntroModal(${r.id})">Resend intro email <span class="ki-icon">↻</span></div>`);
+    items.push(`<div class="kebab-item" onclick="closeAllKebabs();advanceStatus(${r.id})">Mark confirmed <span class="ki-icon">✓</span></div>`);
+  }
+  if (r.status === "Ambassador Confirmed") {
+    items.push(`<div class="kebab-item" onclick="closeAllKebabs();advanceStatus(${r.id})">Mark chat completed <span class="ki-icon">✓</span></div>`);
+  }
+  if (r.status === "Chat Completed") {
+    items.push(`<div class="kebab-item" onclick="closeAllKebabs();sendFeedback(${r.id})">Send feedback form <span class="ki-icon">↗</span></div>`);
+  }
+  if (r.status === "Feedback Sent") {
+    items.push(`<div class="kebab-item" onclick="closeAllKebabs();advanceStatus(${r.id})">Mark feedback received <span class="ki-icon">✓</span></div>`);
+  }
+
+  if (isStalled(r)) {
+    items.push(`<div class="kebab-divider"></div>`);
+    items.push(`<div class="kebab-item danger" onclick="closeAllKebabs();sendNudge(${r.id})">Nudge ambassador <span class="ki-icon">⚡</span></div>`);
+  }
+
+  if (r.status !== "Feedback Received") {
+    if (!isStalled(r)) items.push(`<div class="kebab-divider"></div>`);
+    items.push(`<div class="kebab-item" onclick="closeAllKebabs();changeAmbassador(${r.id})">Reassign ambassador <span class="ki-icon">⟳</span></div>`);
+  }
+
+  return `<div class="kebab-wrap">
+    <button class="kebab-btn" onclick="toggleKebab(${r.id}, event, this)" aria-label="Actions">⋮</button>
+    <div class="kebab-menu" id="kebab-${r.id}" onclick="event.stopPropagation()">
+      ${items.join('')}
+    </div>
+  </div>`;
+}
+
+function toggleKebab(reqId, e, btn) {
+  e.stopPropagation();
+  const menu = document.getElementById(`kebab-${reqId}`);
+  const isOpen = menu.classList.contains('open');
+  closeAllKebabs();
+  if (!isOpen) {
+    const rect = btn.getBoundingClientRect();
+    menu.style.top = (rect.bottom + 4) + 'px';
+    menu.style.left = (rect.right - 190) + 'px';
+    menu.classList.add('open');
+    document.body.appendChild(menu);
+  }
+}
+
+function closeAllKebabs() {
+  document.querySelectorAll('.kebab-menu.open').forEach(m => m.classList.remove('open'));
+}
+
+// ─────────────────────────────────────────
+// Actions
+// ─────────────────────────────────────────
+
+function assignAmbassador(reqId, selectEl) {
+  const val = parseInt(selectEl.value);
+  if (!val) return;
+  const req = requests.find(r => r.id === reqId);
+  req.ambId = val;
+  const amb = AMBASSADORS.find(a => a.id === val);
+  toast(`${amb.name} assigned to ${req.studentName}`, "success");
+  re();
+}
+
+
+function today() { return new Date().toISOString().slice(0,10); }
+
+function advanceStatus(reqId) {
+  const req = requests.find(r => r.id === reqId);
+  const idx = STATUS_ORDER.indexOf(req.status);
+  if (idx < STATUS_ORDER.length - 1) {
+    req.status = STATUS_ORDER[idx + 1];
+    req.statusUpdated = today();
+    req.activityLog.push({ date: today(), action: `Status changed to: ${req.status}`, type: "status" });
+    toast(`Status → ${req.status}`, "info");
+    re();
+  }
+}
+
+function sendFeedback(reqId) {
+  const req = requests.find(r => r.id === reqId);
+  req.status = "Feedback Sent";
+  req.statusUpdated = today();
+  req.activityLog.push({ date: today(), action: "Feedback form sent to student", type: "status" });
+  toast("Feedback form sent to student (simulated)", "success");
+  re();
+}
+
+function sendNudge(reqId) {
+  const req = requests.find(r => r.id === reqId);
+  const amb = AMBASSADORS.find(a => a.id === req.ambId);
+  req.activityLog.push({ date: today(), action: `Nudge sent to ambassador: ${amb.name}`, type: "note" });
+  toast(`Reminder email sent to ${amb.name}`, "info");
+  re();
+}
+
+function changeAmbassador(reqId) {
+  const req = requests.find(r => r.id === reqId);
+  const oldAmb = req.ambId ? AMBASSADORS.find(a => a.id === req.ambId) : null;
+  req.ambId = null;
+  if (oldAmb) req.activityLog.push({ date: today(), action: `Ambassador unassigned: ${oldAmb.name}`, type: "assigned" });
+  toast("Ambassador unassigned — choose a new one", "warning");
+  re();
+}
+
+function addMockRequest() {
+  const names = ["Jordan Lee","Preethi Rao","Sam Kowalski","Mei Zhang","Lucas Bernard"];
+  const interests = ["Software Engineering","Product Management","Data & AI","UX / Design","Cybersecurity"];
+  const prefTypes = ["student","alumni","any"];
+  const name = names[Math.floor(Math.random()*names.length)];
+  const t = today();
+  requests.unshift({
+    id: nextId++,
+    studentName: name,
+    studentEmail: name.toLowerCase().replace(' ','.')+'@gmail.com',
+    submitted: t,
+    interest: interests[Math.floor(Math.random()*interests.length)],
+    preferredType: prefTypes[Math.floor(Math.random()*prefTypes.length)],
+    ambId: null,
+    status: "Pending Assignment",
+    statusUpdated: t,
+    notes: "",
+    activityLog: [{ date: t, action: "Request created", type: "created" }],
+  });
+  toast(`New request from ${name} added`, "info");
+  re();
+}
+
+function exportCSV() {
+  const rows = [
+    ["Student","Email","Submitted","Interest","Ambassador","Status","Days in Status"],
+    ...requests.map(r => {
+      const amb = r.ambId ? AMBASSADORS.find(a=>a.id===r.ambId)?.name : "Unassigned";
+      return [r.studentName, r.studentEmail, r.submitted, r.interest, amb, effectiveStatus(r), daysAgo(r.statusUpdated)];
+    })
+  ];
+  const csv = rows.map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+  a.download = 'coffeechat-requests.csv';
+  a.click();
+  toast("CSV exported", "success");
+}
+
+// ─────────────────────────────────────────
+// Email modal
+// ─────────────────────────────────────────
+
+let pendingModalReqId = null;
+
+function openIntroModal(reqId) {
+  const req = requests.find(r => r.id === reqId);
+  const amb = AMBASSADORS.find(a => a.id === req.ambId);
+  pendingModalReqId = reqId;
+
+  document.getElementById("modal-title").textContent =
+    req.status === "Intro Sent" ? "Resend Intro Email" : "Send Intro Email";
+  document.getElementById("modal-sub").textContent =
+    `To: ${req.studentEmail} & ${amb.email}`;
+
+  document.getElementById("email-preview").innerHTML = buildIntroEmail(req, amb);
+
+  document.getElementById("modal-confirm-btn").textContent = "Send Email";
+  document.getElementById("modal-confirm-btn").onclick = () => confirmSendIntro(reqId);
+
+  document.getElementById("modal-backdrop").style.display = "flex";
+}
+
+function buildIntroEmail(req, amb) {
+  const studentFirst = req.studentName.split(' ')[0];
+  const ambFirst     = amb.name.split(' ')[0];
+  const ambRole      = amb.type === 'alumni'
+    ? 'an MSTI alumni happy to share insights and support future students'
+    : 'an MSTI student ambassador happy to share insights and support future students';
+
+  return `
+    <p><strong>Subject: Prospective Student Connecting with MSTI Students and Alumni</strong></p>
+    <p>Dear ${studentFirst} and ${ambFirst},</p>
+    <p>Thank you both for your interest in connecting with the MSTI network. Let me introduce you to each other!</p>
+    <ul>
+      <li>Meet <strong>${studentFirst}</strong>: a prospective MSTI student eager to learn more about the program and alumni experiences.
+        <ul>
+          <li>Email: <a href="mailto:${req.studentEmail}">${req.studentEmail}</a></li>
+        </ul>
+      </li>
+      <li>Meet <strong>${amb.name}</strong>: ${ambRole}.
+        <ul>
+          <li>Email: <a href="mailto:${amb.email}">${amb.email}</a></li>
+          <li>LinkedIn: <a href="https://${amb.linkedin}" target="_blank">https://${amb.linkedin}</a></li>
+        </ul>
+      </li>
+    </ul>
+    <p>You're welcome to connect directly via email to arrange a call, virtual meeting, or even an in-person visit based on your preferences. Hope this leads to a meaningful and engaging conversation.</p>
+    <p>If you need any assistance, feel free to reply to this email to reach out to the ambassadors. Enjoy the chat!</p>
+    <p>Best,<br>MSTI Admissions Ambassadors</p>
+    <hr class="sig-divider">
+    <div class="sig-block">
+      Master of Science in Technology Innovation<br>
+      Global Innovation Exchange (GIX)<br>
+      University of Washington<br>
+      <span class="sig-links">
+        <a href="mailto:joinmsti@uw.edu">joinmsti@uw.edu</a> |
+        <a href="#" target="_blank">GIX</a> |
+        <a href="#" target="_blank">LinkedIn</a>
+      </span><br>
+      <img src="images/email_image.png" alt="Global Innovation Exchange — University of Washington" class="sig-logo">
+      <div class="sig-social">
+        <a href="#" class="social-icon"><i class="fa-brands fa-facebook-f"></i></a>
+        <a href="#" class="social-icon"><i class="fa-brands fa-instagram"></i></a>
+        <a href="#" class="social-icon"><i class="fa-brands fa-x-twitter"></i></a>
+        <a href="#" class="social-icon"><i class="fa-brands fa-linkedin-in"></i></a>
+      </div>
+    </div>
+  `;
+}
+
+function confirmSendIntro(reqId) {
+  const req = requests.find(r => r.id === reqId);
+  req.status = "Intro Sent";
+  req.statusUpdated = today();
+  req.activityLog.push({ date: today(), action: "Intro email sent", type: "status" });
+  const amb = AMBASSADORS.find(a => a.id === req.ambId);
+  closeModal();
+  toast(`Intro email sent to ${req.studentName} & ${amb.name}`, "success");
+  re();
+}
+
+function closeModal(e) {
+  if (e && e.target !== document.getElementById("modal-backdrop")) return;
+  document.getElementById("modal-backdrop").style.display = "none";
+}
+
+// ─────────────────────────────────────────
+// Toast
+// ─────────────────────────────────────────
+
+function toast(msg, type = "info") {
+  const el = document.createElement("div");
+  el.className = `toast ${type}`;
+  const icons = { success: "✓", info: "ℹ", warning: "⚠" };
+  el.innerHTML = `<span>${icons[type]||'ℹ'}</span><span>${msg}</span>`;
+  document.getElementById("toast-container").appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+
+// ─────────────────────────────────────────
+// Filters & search
+// ─────────────────────────────────────────
+
+document.getElementById("filter-tabs").addEventListener("click", e => {
+  if (!e.target.classList.contains("tab")) return;
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  e.target.classList.add("active");
+  activeFilter = e.target.dataset.filter;
+  currentPage = 1;
+  re();
+});
+
+document.getElementById("search").addEventListener("input", e => {
+  searchQuery = e.target.value;
+  currentPage = 1;
+  re();
+});
+
+// ─────────────────────────────────────────
+// View switching
+// ─────────────────────────────────────────
+
+let activeView = 'requests';
+
+function switchView(view, btn) {
+  activeView = view;
+  document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('main-title').textContent = 'Coffee Chat Program';
+  document.getElementById('view-requests').style.display = view === 'requests' ? '' : 'none';
+  document.getElementById('view-ambassadors').style.display = view === 'ambassadors' ? '' : 'none';
+  if (view === 'ambassadors') renderAmbGrid();
+  closeDetailPanel();
+}
+
+// ─────────────────────────────────────────
+// Detail panel
+// ─────────────────────────────────────────
+
+let detailPanelReqId = null;
+
+function openDetailPanel(reqId) {
+  detailPanelReqId = reqId;
+  renderDetailPanel();
+  document.getElementById('detail-panel').classList.add('open');
+}
+
+function closeDetailPanel() {
+  detailPanelReqId = null;
+  document.getElementById('detail-panel').classList.remove('open');
+}
+
+function renderDetailPanel() {
+  const req = requests.find(r => r.id === detailPanelReqId);
+  if (!req) return;
+  const amb = req.ambId ? AMBASSADORS.find(a => a.id === req.ambId) : null;
+  const es = effectiveStatus(req);
+
+  document.getElementById('dp-name').textContent = req.studentName;
+  document.getElementById('dp-email').textContent = req.studentEmail;
+
+  const prefLabel = { student: '🎓 Student', alumni: '💼 Alumni', any: 'No preference' }[req.preferredType] || '—';
+  const prefClass = { student: 'pref-student', alumni: 'pref-alumni', any: 'pref-any' }[req.preferredType] || 'pref-any';
+
+  const logs = [...(req.activityLog || [])].reverse();
+  const logHtml = logs.length
+    ? logs.map(l => `<div class="log-entry type-${l.type}">
+        <div class="log-action">${l.action}</div>
+        <div class="log-date">${fmt(l.date)}</div>
+      </div>`).join('')
+    : '<p style="font-size:12px;color:var(--muted)">No activity yet.</p>';
+
+  document.getElementById('dp-body').innerHTML = `
+    <div class="detail-field">
+      <div class="detail-field-label">Status</div>
+      <span class="status ${STATUS_CLASSES[es]}">${es}</span>
+    </div>
+    <div class="detail-field">
+      <div class="detail-field-label">Submitted</div>
+      <div style="font-size:13px">${fmt(req.submitted)}</div>
+    </div>
+    <div class="detail-field">
+      <div class="detail-field-label">Program Interest</div>
+      <span class="interest-badge">${req.interest}</span>
+    </div>
+    <div class="detail-field">
+      <div class="detail-field-label">Ambassador Preference</div>
+      <span class="pref-badge ${prefClass}">${prefLabel}</span>
+    </div>
+    <div class="detail-field">
+      <div class="detail-field-label">Assigned Ambassador</div>
+      ${amb
+        ? `<div style="font-size:13px;font-weight:600">${amb.name}</div><div style="font-size:12px;color:var(--muted)">${amb.cohort} · ${amb.type === 'alumni' ? 'Alumni' : 'Student'}</div>`
+        : `<span style="font-size:13px;color:var(--muted)">Unassigned</span>`}
+    </div>
+    <div class="detail-section-title">Notes</div>
+    <textarea class="detail-note-textarea" id="dp-notes" placeholder="Add a note…">${req.notes || ''}</textarea>
+    <button class="btn btn-outline btn-sm" style="margin-top:8px" onclick="saveDetailNote(${req.id})">Save Note</button>
+    <div class="detail-section-title">Activity Log</div>
+    ${logHtml}
+  `;
+}
+
+function saveDetailNote(reqId) {
+  const req = requests.find(r => r.id === reqId);
+  const note = document.getElementById('dp-notes').value.trim();
+  req.notes = note;
+  if (note) {
+    req.activityLog.push({ date: today(), action: `Note: ${note.slice(0, 80)}${note.length > 80 ? '…' : ''}`, type: "note" });
+  }
+  toast("Note saved", "success");
+  renderDetailPanel();
+}
+
+// ─────────────────────────────────────────
+// Add Request modal
+// ─────────────────────────────────────────
+
+function openAddRequestModal() {
+  ['ar-name','ar-email','ar-notes'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('ar-interest').value = 'Software Engineering';
+  document.getElementById('ar-pref').value = 'any';
+  document.getElementById('add-request-backdrop').style.display = 'flex';
+}
+
+function closeAddRequestModal(e) {
+  if (e && e.target !== document.getElementById('add-request-backdrop')) return;
+  document.getElementById('add-request-backdrop').style.display = 'none';
+}
+
+function submitAddRequest() {
+  const name = document.getElementById('ar-name').value.trim();
+  const email = document.getElementById('ar-email').value.trim();
+  if (!name || !email) { toast("Name and email are required", "warning"); return; }
+  const t = today();
+  requests.unshift({
+    id: nextId++,
+    studentName: name,
+    studentEmail: email,
+    submitted: t,
+    interest: document.getElementById('ar-interest').value,
+    preferredType: document.getElementById('ar-pref').value,
+    ambId: null,
+    status: "Pending Assignment",
+    statusUpdated: t,
+    notes: document.getElementById('ar-notes').value.trim(),
+    activityLog: [{ date: t, action: "Request created", type: "created" }],
+  });
+  document.getElementById('add-request-backdrop').style.display = 'none';
+  toast(`Request added for ${name}`, "success");
+  re();
+}
+
+// ─────────────────────────────────────────
+// Add Ambassador modal
+// ─────────────────────────────────────────
+
+function openAddAmbassadorModal() {
+  ['aa-name','aa-email','aa-cohort','aa-linkedin'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('aa-type').value = 'student';
+  document.getElementById('add-amb-backdrop').style.display = 'flex';
+}
+
+function closeAddAmbassadorModal(e) {
+  if (e && e.target !== document.getElementById('add-amb-backdrop')) return;
+  document.getElementById('add-amb-backdrop').style.display = 'none';
+}
+
+function submitAddAmbassador() {
+  const name = document.getElementById('aa-name').value.trim();
+  const email = document.getElementById('aa-email').value.trim();
+  if (!name || !email) { toast("Name and email are required", "warning"); return; }
+  const newId = Math.max(...AMBASSADORS.map(a => a.id)) + 1;
+  AMBASSADORS.push({
+    id: newId,
+    name,
+    email,
+    cohort: document.getElementById('aa-cohort').value.trim() || '—',
+    type: document.getElementById('aa-type').value,
+    linkedin: document.getElementById('aa-linkedin').value.trim() || '',
+  });
+  document.getElementById('add-amb-backdrop').style.display = 'none';
+  toast(`${name} added as ambassador`, "success");
+  renderAmbGrid();
+}
+
+// ─────────────────────────────────────────
+// Ambassadors grid
+// ─────────────────────────────────────────
+
+function renderAmbGrid() {
+  const students = AMBASSADORS.filter(a => a.type === 'student');
+  const alumni = AMBASSADORS.filter(a => a.type === 'alumni');
+
+  const total = AMBASSADORS.length;
+  document.getElementById('amb-subtitle').textContent =
+    `${total} total · ${students.length} students · ${alumni.length} alumni`;
+
+  function cardHtml(a) {
+    const initials = a.name.split(' ').map(w => w[0]).join('').slice(0,2);
+    const activeCount = requests.filter(r => r.ambId === a.id && !["Feedback Received","Chat Completed","Feedback Sent"].includes(r.status)).length;
+    const completedCount = requests.filter(r => r.ambId === a.id && ["Feedback Received","Chat Completed","Feedback Sent"].includes(r.status)).length;
+    const typeClass = a.type === 'alumni' ? 'amb-type-alumni' : 'amb-type-student';
+    const typeLabel = a.type === 'alumni' ? 'Alumni' : 'Student';
+    const linkedinHtml = a.linkedin
+      ? `<a href="https://${a.linkedin}" target="_blank"><i class="fa-brands fa-linkedin"></i> ${a.linkedin}</a>`
+      : '';
+    const statsHtml = a.type === 'student'
+      ? `<div class="amb-card-stats">
+          <div class="amb-stat"><span class="amb-stat-val">${activeCount}</span><span class="amb-stat-lbl">Active</span></div>
+          <div class="amb-stat"><span class="amb-stat-val">${completedCount}</span><span class="amb-stat-lbl">Completed</span></div>
+        </div>`
+      : `<div class="amb-card-stats">
+          <div class="amb-stat"><span class="amb-stat-val">${completedCount}</span><span class="amb-stat-lbl">Chats completed</span></div>
+        </div>`;
+    return `<div class="amb-card">
+      <div class="amb-card-header">
+        <div class="amb-avatar">${initials}</div>
+        <div>
+          <div class="amb-card-name">${a.name}</div>
+          <div class="amb-card-cohort">${a.cohort}</div>
+        </div>
+      </div>
+      <span class="amb-type-badge ${typeClass}">${typeLabel}</span>
+      <div class="amb-card-info">
+        <span><i class="fa-regular fa-envelope" style="width:14px"></i> ${a.email}</span>
+        ${linkedinHtml}
+      </div>
+      ${statsHtml}
+    </div>`;
+  }
+
+  document.getElementById('amb-grid-students').innerHTML = students.map(cardHtml).join('');
+  document.getElementById('amb-grid-alumni').innerHTML = alumni.map(cardHtml).join('');
+}
+
+// ─────────────────────────────────────────
+// Re-render
+// ─────────────────────────────────────────
+
+function re() {
+  renderStats();
+  renderTable();
+  if (detailPanelReqId !== null) renderDetailPanel();
+}
+
+// Boot
+re();
+</script>
+</body>
+</html>
