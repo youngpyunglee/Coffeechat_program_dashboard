@@ -543,7 +543,7 @@
     .kebab-item {
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      gap: 10px;
       padding: 9px 14px;
       font-size: 13px;
       cursor: pointer;
@@ -552,7 +552,7 @@
       transition: background .1s;
     }
     .kebab-item:hover { background: var(--bg); }
-    .kebab-item .ki-icon { font-size: 14px; color: var(--muted); flex-shrink: 0; }
+    .kebab-item .ki-icon { font-size: 14px; color: var(--muted); flex-shrink: 0; margin-left: auto; }
     .kebab-item.danger { color: var(--danger); }
     .kebab-item.danger .ki-icon { color: var(--danger); }
 
