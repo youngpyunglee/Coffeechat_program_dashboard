@@ -126,6 +126,17 @@
       display: flex;
       align-items: center;
       gap: 6px;
+      border: none;
+      width: 100%;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .coordinator-chip:hover { background: #e4d9ff; }
+
+    .view-tab-link {
+      text-decoration: none;
+      color: inherit;
     }
 
     /* ── Main area ── */
@@ -972,9 +983,14 @@
     <button class="view-tab" onclick="switchView('ambassadors', this)">
       <span class="tab-icon"><i class="fa-solid fa-users"></i></span> Ambassadors
     </button>
+    <a class="view-tab view-tab-link" href="ambassador.html">
+      <span class="tab-icon"><i class="fa-solid fa-user"></i></span> Ambassador Portal
+    </a>
   </nav>
   <div class="sidebar-footer">
-    <div class="coordinator-chip"><i class="fa-solid fa-clipboard-list"></i> Coordinator View</div>
+    <button type="button" class="coordinator-chip" onclick="switchToCoordinatorHome()" title="Return to Requests">
+      <i class="fa-solid fa-clipboard-list"></i> Coordinator View
+    </button>
   </div>
 </aside>
 
@@ -1943,6 +1959,11 @@ function switchView(view, btn) {
   document.getElementById('view-ambassadors').style.display = view === 'ambassadors' ? '' : 'none';
   if (view === 'ambassadors') renderAmbGrid();
   closeDetailPanel();
+}
+
+function switchToCoordinatorHome() {
+  const requestsTab = document.querySelector('.sidebar-nav .view-tab');
+  if (requestsTab) switchView('requests', requestsTab);
 }
 
 // ─────────────────────────────────────────
