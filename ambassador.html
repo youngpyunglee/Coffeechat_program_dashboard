@@ -497,24 +497,134 @@
     }
 
     .email-preview p { margin-bottom: 12px; }
+
+    /* ── Email compose box + GIX signature ── */
+    .email-compose-box {
+      background: #fff;
+      border: 1px solid #e0d9f5;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 18px;
+    }
+
+    .email-editable {
+      width: 100%;
+      border: none;
+      border-bottom: 1px solid #ebe6f7;
+      border-radius: 0;
+      padding: 16px 18px;
+      font-size: 13px;
+      font-family: inherit;
+      line-height: 1.7;
+      resize: vertical;
+      min-height: 220px;
+      max-height: 340px;
+      outline: none;
+      background: #faf9ff;
+      color: var(--text);
+    }
+    .email-editable:focus { background: #fff; }
+
+    .email-sig-footer {
+      background: #fff;
+      padding: 14px 18px 16px;
+    }
+
+    .email-sig-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .55px;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+
+    .email-sig-card {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+
+    .email-sig-logo-wrap {
+      flex-shrink: 0;
+      width: 64px;
+      padding-top: 2px;
+    }
+
+    .email-sig-logo {
+      width: 100%;
+      height: auto;
+      display: block;
+      object-fit: contain;
+    }
+
+    .email-sig-info { flex: 1; min-width: 0; }
+
+    .email-sig-org {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--purple);
+      line-height: 1.35;
+      margin-bottom: 3px;
+    }
+
+    .email-sig-dept {
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.45;
+      margin-bottom: 10px;
+    }
+
+    .email-sig-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .email-sig-links a {
+      font-size: 11px;
+      color: var(--purple);
+      text-decoration: none;
+      padding: 4px 9px;
+      background: #f3effb;
+      border-radius: 999px;
+      font-weight: 600;
+      transition: background .15s;
+    }
+
+    .email-sig-links a:hover { background: #e8dff8; }
+
+    .email-sig-social {
+      display: flex;
+      gap: 7px;
+      align-items: center;
+    }
+
+    .email-sig-social a {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #f3f4f6;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--purple);
+      font-size: 12px;
+      text-decoration: none;
+      transition: background .15s, color .15s;
+    }
+
+    .email-sig-social a:hover {
+      background: #ede6fb;
+      color: var(--purple-light, #6b46b0);
+    }
+
+    /* Legacy preview signature (faculty connect drawer) */
     .email-preview .sig-divider,
-    .email-sig-footer .sig-divider { border: none; border-top: 1px solid #ccc; margin: 16px 0 10px; width: 200px; }
+    .email-sig-footer .sig-divider { border: none; border-top: 1px solid #e8eaf2; margin: 16px 0 12px; }
     .email-preview .sig-block,
     .email-sig-footer .sig-block { font-size: 12px; line-height: 1.6; color: #333; }
-    .email-preview .sig-links a,
-    .email-sig-footer .sig-links a { color: #4b2e83; text-decoration: none; }
-    .email-preview .sig-links a:hover,
-    .email-sig-footer .sig-links a:hover { text-decoration: underline; }
-    .email-preview .sig-logo,
-    .email-sig-footer .sig-logo { margin-top: 10px; height: 48px; display: block; max-width: 100%; }
-    .email-preview .sig-social,
-    .email-sig-footer .sig-social { display: flex; gap: 14px; margin-top: 12px; align-items: center; }
-    .email-preview .social-icon,
-    .email-sig-footer .social-icon { color: #000; font-size: 20px; text-decoration: none; line-height: 1; }
-    .email-preview .social-icon:hover,
-    .email-sig-footer .social-icon:hover { color: #444; }
-
-    .email-sig-footer { background: #f9f8ff; border: 1px solid #e0d9f5; border-top: none; border-radius: 0 0 6px 6px; padding: 4px 16px 16px; }
 
     .email-section-label {
       font-size: 10px;
@@ -789,13 +899,6 @@
     .mf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
 
     /* ── Editable email + date slots ── */
-    .email-editable {
-      width: 100%; border: none; border-radius: 6px 6px 0 0;
-      padding: 16px 18px; font-size: 13px; font-family: inherit;
-      line-height: 1.7; resize: vertical; min-height: 220px; max-height: 340px;
-      outline: none; background: transparent; color: var(--text);
-    }
-    .email-editable:focus { outline: none; }
     .slot-section { margin-bottom: 14px; }
     .slot-rows { display: flex; flex-direction: column; gap: 7px; }
     .slot-row { display: flex; align-items: center; gap: 8px; }
@@ -978,28 +1081,9 @@
       <div class="email-section-label" style="margin-bottom:0">EMAIL CONTENT</div>
       <button class="email-reset-btn" onclick="resetEmailBody()" title="Restore original template"><i class="fa-solid fa-rotate-left" style="font-size:11px"></i> Reset to template</button>
     </div>
-    <div style="background:#f9f8ff;border:1px solid #e0d9f5;border-radius:6px;display:flex;flex-direction:column;margin-bottom:18px">
+    <div class="email-compose-box">
       <textarea class="email-editable" id="email-preview-body"></textarea>
-      <div style="padding:0 18px 18px 18px">
-        <hr class="sig-divider">
-        <div class="sig-block">
-          Master of Science in Technology Innovation<br>
-          Global Innovation Exchange (GIX)<br>
-          University of Washington<br>
-          <span class="sig-links">
-            <a href="mailto:joinmsti@uw.edu">joinmsti@uw.edu</a> |
-            <a href="https://gix.uw.edu" target="_blank">GIX</a> |
-            <a href="https://www.linkedin.com/school/gix-global-innovation-exchange/" target="_blank">LinkedIn</a>
-          </span><br>
-          <img src="images/email_image.png" alt="Global Innovation Exchange — University of Washington" class="sig-logo">
-          <div class="sig-social">
-            <a href="#" class="social-icon"><i class="fa-brands fa-facebook-f"></i></a>
-            <a href="#" class="social-icon"><i class="fa-brands fa-instagram"></i></a>
-            <a href="#" class="social-icon"><i class="fa-brands fa-x-twitter"></i></a>
-            <a href="#" class="social-icon"><i class="fa-brands fa-linkedin-in"></i></a>
-          </div>
-        </div>
-      </div>
+      <div class="email-sig-footer" id="email-sig-footer"></div>
     </div>
 
     <div class="modal-footer">
@@ -1860,6 +1944,37 @@ function getSlotsLines() {
   }).filter(Boolean).map(s => `  → ${s}`).join('\n');
 }
 
+// ── GIX email signature ──
+function gixEmailSignatureHtml() {
+  return `<div class="email-sig-label">Signature · included automatically</div>
+    <div class="email-sig-card">
+      <div class="email-sig-logo-wrap">
+        <img src="/images/email_image.png" alt="Global Innovation Exchange" class="email-sig-logo"
+          onerror="this.onerror=null;this.src='/images/GIX_logo.png'">
+      </div>
+      <div class="email-sig-info">
+        <div class="email-sig-org">Master of Science in Technology Innovation</div>
+        <div class="email-sig-dept">Global Innovation Exchange (GIX)<br>University of Washington</div>
+        <div class="email-sig-links">
+          <a href="mailto:joinmsti@uw.edu">joinmsti@uw.edu</a>
+          <a href="https://gix.uw.edu" target="_blank" rel="noopener">gix.uw.edu</a>
+          <a href="https://www.linkedin.com/school/gix-global-innovation-exchange/" target="_blank" rel="noopener">LinkedIn</a>
+        </div>
+        <div class="email-sig-social">
+          <a href="https://gix.uw.edu" target="_blank" rel="noopener" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+          <a href="https://gix.uw.edu" target="_blank" rel="noopener" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
+          <a href="https://gix.uw.edu" target="_blank" rel="noopener" aria-label="X"><i class="fa-brands fa-x-twitter"></i></a>
+          <a href="https://www.linkedin.com/school/gix-global-innovation-exchange/" target="_blank" rel="noopener" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderEmailSignature() {
+  const footer = document.getElementById('email-sig-footer');
+  if (footer) footer.innerHTML = gixEmailSignatureHtml();
+}
+
 function openEmailModal(reqId, type) {
   const r = requests.find(x => x.id === reqId);
   const amb = AMBASSADORS.find(a => a.id === currentAmbId);
@@ -1887,6 +2002,7 @@ function openEmailModal(reqId, type) {
     ? buildFollowupEmailText(r, amb)
     : buildIntroEmailText(r, amb);
 
+  renderEmailSignature();
   document.getElementById("email-modal-send-btn").onclick = () => sendEmail(reqId, type);
   document.getElementById("email-modal-backdrop").style.display = "flex";
 }
@@ -2244,24 +2360,7 @@ function fcRefreshEmail() {
      <p>I wanted to connect you with <strong>${r.studentName}</strong>, a prospective MSTI student I had a great coffee chat with recently. During our conversation, ${stuFirst} expressed strong interest in <em>${topic.toLowerCase()}</em>.${notesBit} I thought you would be the ideal person to speak with them further.</p>
      <p>I've cc'd ${stuFirst} on this email — please feel free to reach out directly to set up a time.</p>
      <p>Best,<br>${amb.name}<br><span style="color:var(--muted)">GIX MSTI Ambassador</span></p>
-     <hr class="sig-divider">
-     <div class="sig-block">
-       Master of Science in Technology Innovation<br>
-       Global Innovation Exchange (GIX)<br>
-       University of Washington<br>
-       <span class="sig-links">
-         <a href="mailto:joinmsti@uw.edu">joinmsti@uw.edu</a> |
-         <a href="https://gix.uw.edu" target="_blank">GIX</a> |
-         <a href="https://www.linkedin.com/school/gix-global-innovation-exchange/" target="_blank">LinkedIn</a>
-       </span><br>
-       <img src="images/email_image.png" alt="Global Innovation Exchange — University of Washington" class="sig-logo">
-       <div class="sig-social">
-         <a href="#" class="social-icon"><i class="fa-brands fa-facebook-f"></i></a>
-         <a href="#" class="social-icon"><i class="fa-brands fa-instagram"></i></a>
-         <a href="#" class="social-icon"><i class="fa-brands fa-x-twitter"></i></a>
-         <a href="#" class="social-icon"><i class="fa-brands fa-linkedin-in"></i></a>
-       </div>
-     </div>`;
+     ${gixEmailSignatureHtml()}`;
 }
 
 function fcCopyEmail() {
@@ -2342,6 +2441,7 @@ function mfAddFaculty() {
 // ─────────────────────────────────────────
 
 populateSwitcher();
+renderEmailSignature();
 </script>
 </body>
 </html>
