@@ -1514,7 +1514,7 @@ function buildCard(r, amb) {
   if (!done) {
     // Can always send/resend an intro or follow-up email
     const emailBtnLabel = r.status === 'Intro Sent' || r.status === 'Ambassador Confirmed'
-      ? '<i class="fa-regular fa-envelope"></i> Send Follow-up Email'
+      ? '<i class="fa-regular fa-envelope"></i> Reach Out to Student'
       : '<i class="fa-regular fa-envelope"></i> Send Intro Email';
     const emailType = r.status === 'Intro Sent' || r.status === 'Ambassador Confirmed' ? 'followup' : 'intro';
 
@@ -1844,7 +1844,7 @@ function openEmailModal(reqId, type) {
   emailModalType = type;
 
   const isFollowup = type === 'followup';
-  document.getElementById("email-modal-title").textContent = isFollowup ? "Send Follow-up Email" : "Send Intro Email";
+  document.getElementById("email-modal-title").textContent = isFollowup ? "Reach Out to Student" : "Send Intro Email";
   document.getElementById("email-modal-sub").textContent = `To: ${r.studentName} <${r.studentEmail}>`;
 
   // Always show date slots (both intro and follow-up)
@@ -1917,19 +1917,21 @@ function buildFollowupEmailText(r, amb) {
   const firstName = r.studentName.split(' ')[0];
   const role = amb.type === 'alumni' ? 'Alumni Ambassador' : 'Student Ambassador';
   const slots = getSlotsLines();
+  const ambDesc = amb.type === 'alumni'
+    ? `a UW MSTI alumni`
+    : `a current student in the MSTI program`;
   return `Hi ${firstName},
 
-I just wanted to follow up on my previous message — I'd still love to connect and chat about the MSTI program whenever you have some time.
+I hope you're doing well! My name is ${amb.name}, and I'm ${ambDesc} at the University of Washington. You recently submitted a request through the MSTI Coffee Chat Program, and I've been matched with you — I'm excited to connect!
 
-In case it helps, here are a few times I'm available:
+I'd love to introduce myself and answer any questions you have about the MSTI program, student life, the GIX community, or anything else on your mind. Here are a few times I'm available:
 
 ${slots}
 
-Feel free to pick whichever works, suggest another time, or just reach out over email if that's easier.
+Feel free to pick whichever works best, or suggest another time that's more convenient. You can also just reply by email if you'd prefer to start there!
 
-Looking forward to hearing from you!
+Looking forward to chatting with you,
 
-Best,
 ${amb.name}
 MSTI ${role}
 University of Washington`;
