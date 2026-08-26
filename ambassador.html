@@ -977,6 +977,12 @@
     </div>
     <textarea class="email-editable" id="email-preview-body"></textarea>
 
+    <!-- GIX signature preview -->
+    <div style="margin-top:8px;padding:12px 14px;background:#f9f8ff;border:1px solid #e0d9f5;border-radius:8px">
+      <div style="font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.06em;margin-bottom:8px">EMAIL SIGNATURE</div>
+      <img src="images/email_image.png" alt="Global Innovation Exchange — University of Washington" style="height:50px;display:block;max-width:100%">
+    </div>
+
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeEmailModal()">Cancel</button>
       <button class="btn btn-primary" id="email-modal-send-btn">Send Email</button>
@@ -2218,7 +2224,10 @@ function fcRefreshEmail() {
     `<p>Hi ${facLast},</p>
      <p>I wanted to connect you with <strong>${r.studentName}</strong>, a prospective MSTI student I had a great coffee chat with recently. During our conversation, ${stuFirst} expressed strong interest in <em>${topic.toLowerCase()}</em>.${notesBit} I thought you would be the ideal person to speak with them further.</p>
      <p>I've cc'd ${stuFirst} on this email — please feel free to reach out directly to set up a time.</p>
-     <p>Best,<br>${amb.name}<br><span style="color:var(--muted)">GIX MSTI Ambassador</span></p>`;
+     <p>Best,<br>${amb.name}<br><span style="color:var(--muted)">GIX MSTI Ambassador</span></p>
+     <div style="margin-top:16px;padding-top:14px;border-top:1px solid #e8e4f4">
+       <img src="images/email_image.png" alt="Global Innovation Exchange — University of Washington" style="height:56px;display:block;max-width:100%">
+     </div>`;
 }
 
 function fcCopyEmail() {
