@@ -797,15 +797,62 @@
     .slot-rows { display: flex; flex-direction: column; gap: 7px; }
     .slot-row { display: flex; align-items: center; gap: 8px; }
     .slot-num { font-size: 11px; font-weight: 700; color: var(--muted); width: 16px; flex-shrink: 0; }
-    .slot-date, .slot-time {
-      border: 1px solid var(--border); border-radius: 6px;
+    .slot-date {
+      flex: 1; border: 1px solid var(--border); border-radius: 6px;
       padding: 5px 9px; font-size: 12px; font-family: inherit;
       outline: none; color: var(--text); background: white;
     }
-    .slot-date { flex: 1; }
-    .slot-time { width: 108px; }
-    .slot-date:focus, .slot-time:focus { border-color: var(--purple); }
-    .slot-tz { font-size: 11px; color: var(--muted); font-weight: 600; }
+    .slot-date:focus { border-color: var(--purple); }
+    /* Custom time trigger */
+    .tp-trigger {
+      width: 112px; flex-shrink: 0; border: 1px solid var(--border); border-radius: 6px;
+      padding: 5px 9px; font-size: 12px; cursor: pointer; color: var(--text);
+      background: white; user-select: none; display: flex; align-items: center; gap: 6px;
+      transition: border-color .15s;
+    }
+    .tp-trigger:hover, .tp-trigger.active { border-color: var(--purple); }
+    .tp-trigger .tp-clock { color: var(--muted); font-size: 11px; margin-left: auto; }
+    /* Drum-roll popup */
+    .tp-popup {
+      position: absolute; z-index: 600; background: white;
+      border-radius: 14px; box-shadow: 0 8px 32px rgba(0,0,0,.18);
+      overflow: hidden; width: 230px;
+    }
+    .tp-inner { position: relative; height: 180px; display: flex; }
+    .tp-fade-top, .tp-fade-bottom {
+      position: absolute; left: 0; right: 0; height: 72px; pointer-events: none; z-index: 2;
+    }
+    .tp-fade-top { top: 0; background: linear-gradient(to bottom, rgba(255,255,255,.95), rgba(255,255,255,0)); }
+    .tp-fade-bottom { bottom: 0; background: linear-gradient(to top, rgba(255,255,255,.95), rgba(255,255,255,0)); }
+    .tp-bar {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      left: 0; right: 0; height: 36px; pointer-events: none; z-index: 1;
+      border-top: 1px solid rgba(75,46,131,.2); border-bottom: 1px solid rgba(75,46,131,.2);
+      background: rgba(75,46,131,.06);
+    }
+    .tp-col {
+      flex: 1; height: 180px; overflow-y: scroll; scroll-snap-type: y mandatory;
+      scrollbar-width: none; -webkit-overflow-scrolling: touch; position: relative; z-index: 0;
+    }
+    .tp-col::-webkit-scrollbar { display: none; }
+    .tp-spacer { height: 72px; flex-shrink: 0; }
+    .tp-item {
+      height: 36px; display: flex; align-items: center; justify-content: center;
+      scroll-snap-align: center; font-size: 15px; color: #555; cursor: pointer;
+    }
+    .tp-sep-col { display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; color: #aaa; width: 16px; flex-shrink: 0; }
+    .tp-actions {
+      display: flex; justify-content: flex-end; gap: 4px; padding: 8px 12px;
+      border-top: 1px solid #f0f0f0;
+    }
+    .tp-actions button {
+      background: none; border: none; font-size: 12px; font-weight: 700;
+      padding: 4px 10px; border-radius: 6px; cursor: pointer; letter-spacing: .05em;
+    }
+    .tp-cancel { color: var(--muted); }
+    .tp-cancel:hover { background: #f5f5f5; }
+    .tp-ok { color: var(--purple); }
+    .tp-ok:hover { background: #f5f0ff; }
     .slot-remove { background: none; border: none; cursor: pointer; color: var(--muted); padding: 2px 4px; border-radius: 4px; line-height: 1; font-size: 14px; transition: color .15s, background .15s; flex-shrink: 0; }
     .slot-remove:hover { color: #c0392b; background: #fdecea; }
     .add-slot-btn { margin-top: 8px; background: none; border: 1.5px dashed var(--border); border-radius: 8px; color: var(--purple); font-size: 12px; font-weight: 600; padding: 6px 14px; cursor: pointer; width: 100%; transition: border-color .15s, background .15s; }
@@ -895,7 +942,7 @@
 
 <!-- Email modal -->
 <div id="email-modal-backdrop" class="modal-backdrop" style="display:none" onclick="closeEmailModal(event)">
-  <div class="modal" id="email-modal-box" style="width:600px;max-height:92vh;overflow-y:auto">
+  <div class="modal" id="email-modal-box" style="width:600px;max-height:92vh;overflow-y:auto;position:relative">
     <h2 id="email-modal-title">Send Intro Email</h2>
     <p class="modal-sub" id="email-modal-sub"></p>
 
@@ -933,6 +980,23 @@
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeEmailModal()">Cancel</button>
       <button class="btn btn-primary" id="email-modal-send-btn">Send Email</button>
+    </div>
+
+    <!-- Drum-roll time picker (shared, positioned absolutely within modal) -->
+    <div id="tp-popup" class="tp-popup" style="display:none">
+      <div class="tp-inner">
+        <div class="tp-fade-top"></div>
+        <div class="tp-fade-bottom"></div>
+        <div class="tp-bar"></div>
+        <div class="tp-col" id="tp-col-h"></div>
+        <div class="tp-sep-col">:</div>
+        <div class="tp-col" id="tp-col-m"></div>
+        <div class="tp-col" id="tp-col-ap"></div>
+      </div>
+      <div class="tp-actions">
+        <button class="tp-cancel" onclick="tpCancel()">CANCEL</button>
+        <button class="tp-ok" onclick="tpOK()">OK</button>
+      </div>
     </div>
   </div>
 </div>
@@ -1597,6 +1661,100 @@ function confirmDone(reqId) {
 // Email modal
 // ─────────────────────────────────────────
 
+// ── Drum-roll time picker ──
+const TP_H = 36; // item height px
+let tpSlotIdx = null;
+
+function tpBuildCol(el, items) {
+  el.innerHTML = `<div class="tp-spacer"></div>` +
+    items.map(v => `<div class="tp-item">${v}</div>`).join('') +
+    `<div class="tp-spacer"></div>`;
+}
+
+function tpInitCols() {
+  const hours = Array.from({length:12}, (_,i) => String(i+1));
+  const mins  = Array.from({length:60}, (_,i) => String(i).padStart(2,'0'));
+  tpBuildCol(document.getElementById('tp-col-h'),  hours);
+  tpBuildCol(document.getElementById('tp-col-m'),  mins);
+  tpBuildCol(document.getElementById('tp-col-ap'), ['AM','PM']);
+}
+
+function tpSetScroll(colId, idx) {
+  const col = document.getElementById(colId);
+  col.scrollTop = idx * TP_H;
+}
+
+function tpOpen(slotIdx, event) {
+  event.stopPropagation();
+  tpSlotIdx = slotIdx;
+  const trigger = document.getElementById(`slot-time-${slotIdx}`);
+  trigger.classList.add('active');
+  const val = trigger.dataset.value || '10:00';
+  const [h24str, mStr] = val.split(':');
+  const h24 = parseInt(h24str) || 10;
+  const m   = parseInt(mStr)   || 0;
+  const h12 = h24 % 12 || 12;
+  const ap  = h24 >= 12 ? 1 : 0;
+  // (scroll set after display, via requestAnimationFrame below)
+
+  const popup  = document.getElementById('tp-popup');
+  const modal  = document.getElementById('email-modal-box');
+  const tRect  = trigger.getBoundingClientRect();
+  const mRect  = modal.getBoundingClientRect();
+  const top    = tRect.bottom - mRect.top + modal.scrollTop + 4;
+  let   left   = tRect.left - mRect.left;
+  // Keep within modal bounds
+  if (left + 230 > modal.clientWidth - 8) left = modal.clientWidth - 238;
+  popup.style.top  = top  + 'px';
+  popup.style.left = left + 'px';
+  popup.style.display = 'block';
+  // Set scroll after layout so the browser can measure offsetHeight
+  requestAnimationFrame(() => {
+    document.getElementById('tp-col-h').scrollTop  = (h12 - 1) * TP_H;
+    document.getElementById('tp-col-m').scrollTop  = m * TP_H;
+    document.getElementById('tp-col-ap').scrollTop = ap * TP_H;
+  });
+}
+
+function tpCancel() {
+  document.getElementById('tp-popup').style.display = 'none';
+  if (tpSlotIdx !== null) document.getElementById(`slot-time-${tpSlotIdx}`)?.classList.remove('active');
+  tpSlotIdx = null;
+}
+
+function tpOK() {
+  if (tpSlotIdx === null) return;
+  const hIdx  = Math.round(document.getElementById('tp-col-h').scrollTop  / TP_H);
+  const mIdx  = Math.round(document.getElementById('tp-col-m').scrollTop  / TP_H);
+  const apIdx = Math.round(document.getElementById('tp-col-ap').scrollTop / TP_H);
+  const h12  = (hIdx % 12) + 1;
+  let h24;
+  if (apIdx === 0) { h24 = h12 === 12 ? 0 : h12; }
+  else             { h24 = h12 === 12 ? 12 : h12 + 12; }
+  const val = `${String(h24).padStart(2,'0')}:${String(mIdx).padStart(2,'0')}`;
+  const trigger = document.getElementById(`slot-time-${tpSlotIdx}`);
+  trigger.dataset.value = val;
+  trigger.querySelector('.tp-time-text').textContent = tpFmt(val);
+  trigger.classList.remove('active');
+  document.getElementById('tp-popup').style.display = 'none';
+  tpSlotIdx = null;
+  updateEmailSlots();
+}
+
+function tpFmt(val24) {
+  if (!val24) return 'Select time';
+  const [h, m] = val24.split(':').map(Number);
+  const ap = h >= 12 ? 'PM' : 'AM';
+  const hr = h % 12 || 12;
+  return `${hr}:${String(m).padStart(2,'0')} ${ap}`;
+}
+
+// Close picker when clicking outside
+document.addEventListener('click', e => {
+  const popup = document.getElementById('tp-popup');
+  if (popup && popup.style.display !== 'none' && !popup.contains(e.target)) tpCancel();
+});
+
 // ── Date slot helpers ──
 function addDays(n) { const d = new Date(); d.setDate(d.getDate() + n); return d; }
 function isoDate(d) { return d.toISOString().slice(0, 10); }
@@ -1617,74 +1775,56 @@ function fmtSlot(dateVal, timeVal) {
 const MAX_SLOTS = 5;
 let slotCount = 0;
 
-function renderSlots() {
-  const container = document.getElementById('slot-rows');
-  if (!container) return;
-  // Preserve existing values
-  const saved = Array.from({ length: slotCount }, (_, i) => ({
-    date: document.getElementById(`slot-date-${i}`)?.value || '',
-    time: document.getElementById(`slot-time-${i}`)?.value || '',
-  }));
-  container.innerHTML = saved.map((s, i) => `
-    <div class="slot-row" id="slot-row-${i}">
-      <span class="slot-num">${i + 1}</span>
-      <input type="date" class="slot-date" id="slot-date-${i}" value="${s.date}" onchange="updateEmailSlots()">
-      <input type="time" class="slot-time" id="slot-time-${i}" value="${s.time}" onchange="updateEmailSlots()">
-      ${slotCount > 1 ? `<button class="slot-remove" onclick="removeSlot(${i})" title="Remove this slot">×</button>` : '<span style="width:22px;flex-shrink:0"></span>'}
-    </div>`).join('');
-  const addBtn = document.getElementById('add-slot-btn');
-  if (addBtn) addBtn.disabled = slotCount >= MAX_SLOTS;
+function slotRowHTML(i, s, total) {
+  const timeDisplay = s.time ? tpFmt(s.time) : 'Select time';
+  const removeBtnOrSpacer = total > 1
+    ? `<button class="slot-remove" onclick="removeSlot(${i})" title="Remove this slot">×</button>`
+    : `<span style="width:22px;flex-shrink:0"></span>`;
+  return `<div class="slot-row" id="slot-row-${i}">
+    <span class="slot-num">${i + 1}</span>
+    <input type="date" class="slot-date" id="slot-date-${i}" value="${s.date}" onchange="updateEmailSlots()">
+    <div class="tp-trigger" id="slot-time-${i}" data-value="${s.time || ''}" onclick="tpOpen(${i}, event)">
+      <span class="tp-time-text">${timeDisplay}</span>
+      <i class="fa-regular fa-clock tp-clock"></i>
+    </div>
+    ${removeBtnOrSpacer}
+  </div>`;
 }
 
 function addSlot(dateVal, timeVal) {
   if (slotCount >= MAX_SLOTS) return;
-  // Save current values before re-render
   const saved = Array.from({ length: slotCount }, (_, i) => ({
     date: document.getElementById(`slot-date-${i}`)?.value || '',
-    time: document.getElementById(`slot-time-${i}`)?.value || '',
+    time: document.getElementById(`slot-time-${i}`)?.dataset.value || '',
   }));
   saved.push({ date: dateVal || '', time: timeVal || '' });
   slotCount++;
-  // Inject saved values then render
   const container = document.getElementById('slot-rows');
   if (!container) return;
-  container.innerHTML = saved.map((s, i) => `
-    <div class="slot-row" id="slot-row-${i}">
-      <span class="slot-num">${i + 1}</span>
-      <input type="date" class="slot-date" id="slot-date-${i}" value="${s.date}" onchange="updateEmailSlots()">
-      <input type="time" class="slot-time" id="slot-time-${i}" value="${s.time}" onchange="updateEmailSlots()">
-      ${slotCount > 1 ? `<button class="slot-remove" onclick="removeSlot(${i})" title="Remove this slot">×</button>` : '<span style="width:22px;flex-shrink:0"></span>'}
-    </div>`).join('');
-  const addBtn = document.getElementById('add-slot-btn');
-  if (addBtn) addBtn.disabled = slotCount >= MAX_SLOTS;
+  container.innerHTML = saved.map((s, i) => slotRowHTML(i, s, slotCount)).join('');
+  document.getElementById('add-slot-btn').disabled = slotCount >= MAX_SLOTS;
   updateEmailSlots();
 }
 
 function removeSlot(idx) {
   if (slotCount <= 1) return;
+  tpCancel();
   const remaining = Array.from({ length: slotCount }, (_, i) => ({
     date: document.getElementById(`slot-date-${i}`)?.value || '',
-    time: document.getElementById(`slot-time-${i}`)?.value || '',
+    time: document.getElementById(`slot-time-${i}`)?.dataset.value || '',
   })).filter((_, i) => i !== idx);
   slotCount = remaining.length;
   const container = document.getElementById('slot-rows');
   if (!container) return;
-  container.innerHTML = remaining.map((s, i) => `
-    <div class="slot-row" id="slot-row-${i}">
-      <span class="slot-num">${i + 1}</span>
-      <input type="date" class="slot-date" id="slot-date-${i}" value="${s.date}" onchange="updateEmailSlots()">
-      <input type="time" class="slot-time" id="slot-time-${i}" value="${s.time}" onchange="updateEmailSlots()">
-      ${slotCount > 1 ? `<button class="slot-remove" onclick="removeSlot(${i})" title="Remove this slot">×</button>` : '<span style="width:22px;flex-shrink:0"></span>'}
-    </div>`).join('');
-  const addBtn = document.getElementById('add-slot-btn');
-  if (addBtn) addBtn.disabled = slotCount >= MAX_SLOTS;
+  container.innerHTML = remaining.map((s, i) => slotRowHTML(i, s, slotCount)).join('');
+  document.getElementById('add-slot-btn').disabled = slotCount >= MAX_SLOTS;
   updateEmailSlots();
 }
 
 function getSlotsLines() {
   return Array.from({ length: slotCount }, (_, i) => {
     const d = document.getElementById(`slot-date-${i}`)?.value;
-    const t = document.getElementById(`slot-time-${i}`)?.value;
+    const t = document.getElementById(`slot-time-${i}`)?.dataset.value;
     return fmtSlot(d, t);
   }).filter(Boolean).map(s => `  → ${s}`).join('\n');
 }
@@ -1707,6 +1847,8 @@ function openEmailModal(reqId, type) {
   // Initialize date slots
   if (!isFollowup) {
     document.getElementById('slot-tz-select').value = 'PT';
+    tpInitCols();
+    document.getElementById('tp-popup').style.display = 'none';
     // Reset to 1 slot pre-filled with today+2
     slotCount = 0;
     document.getElementById('slot-rows').innerHTML = '';
