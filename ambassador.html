@@ -896,12 +896,28 @@
 
     <!-- Available dates (intro only) -->
     <div id="email-slots-section" class="slot-section">
-      <div class="email-section-label" style="margin-bottom:6px">YOUR AVAILABLE DATES</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <div class="email-section-label" style="margin-bottom:0">YOUR AVAILABLE DATES</div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <label for="slot-tz-select" style="font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.04em">TIME ZONE</label>
+          <select id="slot-tz-select" onchange="updateEmailSlots()" style="font-size:12px;padding:3px 6px;border:1px solid var(--border);border-radius:6px;background:white;color:var(--text);cursor:pointer">
+            <option value="PT">PT — Pacific</option>
+            <option value="MT">MT — Mountain</option>
+            <option value="CT">CT — Central</option>
+            <option value="ET">ET — Eastern</option>
+            <option value="GMT">GMT — London</option>
+            <option value="CET">CET — Central Europe</option>
+            <option value="IST">IST — India</option>
+            <option value="CST">CST — China</option>
+            <option value="KST">KST — Korea/Japan</option>
+          </select>
+        </div>
+      </div>
       <p style="font-size:12px;color:var(--muted);margin-bottom:10px">These will appear in your email. Edit any slot or change the times to match your schedule.</p>
       <div class="slot-rows">
-        <div class="slot-row"><span class="slot-num">1</span><input type="date" class="slot-date" id="slot-date-0" onchange="updateEmailSlots()"><input type="time" class="slot-time" id="slot-time-0" onchange="updateEmailSlots()"><span class="slot-tz">PT</span></div>
-        <div class="slot-row"><span class="slot-num">2</span><input type="date" class="slot-date" id="slot-date-1" onchange="updateEmailSlots()"><input type="time" class="slot-time" id="slot-time-1" onchange="updateEmailSlots()"><span class="slot-tz">PT</span></div>
-        <div class="slot-row"><span class="slot-num">3</span><input type="date" class="slot-date" id="slot-date-2" onchange="updateEmailSlots()"><input type="time" class="slot-time" id="slot-time-2" onchange="updateEmailSlots()"><span class="slot-tz">PT</span></div>
+        <div class="slot-row"><span class="slot-num">1</span><input type="date" class="slot-date" id="slot-date-0" onchange="updateEmailSlots()"><input type="time" class="slot-time" id="slot-time-0" onchange="updateEmailSlots()"></div>
+        <div class="slot-row"><span class="slot-num">2</span><input type="date" class="slot-date" id="slot-date-1" onchange="updateEmailSlots()"><input type="time" class="slot-time" id="slot-time-1" onchange="updateEmailSlots()"></div>
+        <div class="slot-row"><span class="slot-num">3</span><input type="date" class="slot-date" id="slot-date-2" onchange="updateEmailSlots()"><input type="time" class="slot-time" id="slot-time-2" onchange="updateEmailSlots()"></div>
       </div>
     </div>
 
@@ -1582,6 +1598,9 @@ function confirmDone(reqId) {
 // ── Date slot helpers ──
 function addDays(n) { const d = new Date(); d.setDate(d.getDate() + n); return d; }
 function isoDate(d) { return d.toISOString().slice(0, 10); }
+function getSelectedTz() {
+  return document.getElementById('slot-tz-select')?.value || 'PT';
+}
 function fmtSlot(dateVal, timeVal) {
   if (!dateVal) return null;
   const d = new Date(dateVal + 'T12:00:00');
@@ -1590,7 +1609,8 @@ function fmtSlot(dateVal, timeVal) {
   const [h, m] = timeVal.split(':').map(Number);
   const ampm = h >= 12 ? 'pm' : 'am';
   const hr = h % 12 || 12;
-  return `${dayStr}, ${hr}:${m === 0 ? '00' : m} ${ampm} PT`;
+  const tz = getSelectedTz();
+  return `${dayStr}, ${hr}:${m === 0 ? '00' : m} ${ampm} ${tz}`;
 }
 function getSlotsLines() {
   return [0, 1, 2].map(i => {
@@ -1617,6 +1637,7 @@ function openEmailModal(reqId, type) {
 
   // Pre-populate date slots
   if (!isFollowup) {
+    document.getElementById('slot-tz-select').value = 'PT';
     const defaults = [
       { d: addDays(2), t: "10:00" },
       { d: addDays(4), t: "14:00" },
