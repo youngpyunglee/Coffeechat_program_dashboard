@@ -805,12 +805,12 @@
 
     /* ── Editable email + date slots ── */
     .email-editable {
-      width: 100%; border: 1px solid #e0d9f5; border-radius: 6px 6px 0 0; border-bottom: none;
-      padding: 16px; font-size: 13px; font-family: inherit;
+      width: 100%; border: none; border-radius: 6px 6px 0 0;
+      padding: 16px 18px; font-size: 13px; font-family: inherit;
       line-height: 1.7; resize: vertical; min-height: 220px; max-height: 340px;
-      outline: none; background: #f9f8ff; color: var(--text);
+      outline: none; background: transparent; color: var(--text);
     }
-    .email-editable:focus { border-color: var(--purple); outline: none; }
+    .email-editable:focus { outline: none; }
     .slot-section { margin-bottom: 14px; }
     .slot-rows { display: flex; flex-direction: column; gap: 7px; }
     .slot-row { display: flex; align-items: center; gap: 8px; }
@@ -988,31 +988,31 @@
       <button class="add-slot-btn" id="add-slot-btn" onclick="addSlot()"><i class="fa-solid fa-plus" style="font-size:10px"></i> Add time slot</button>
     </div>
 
-    <!-- Editable email body -->
+    <!-- Editable email body + signature in one box -->
     <div class="email-label-row">
       <div class="email-section-label" style="margin-bottom:0">EMAIL CONTENT</div>
       <button class="email-reset-btn" onclick="resetEmailBody()" title="Restore original template"><i class="fa-solid fa-rotate-left" style="font-size:11px"></i> Reset to template</button>
     </div>
-    <textarea class="email-editable" id="email-preview-body"></textarea>
-
-    <!-- GIX signature (visually joined to textarea above) -->
-    <div class="email-sig-footer">
-      <hr class="sig-divider">
-      <div class="sig-block">
-        Master of Science in Technology Innovation<br>
-        Global Innovation Exchange (GIX)<br>
-        University of Washington<br>
-        <span class="sig-links">
-          <a href="mailto:joinmsti@uw.edu">joinmsti@uw.edu</a> |
-          <a href="https://gix.uw.edu" target="_blank">GIX</a> |
-          <a href="https://www.linkedin.com/school/gix-global-innovation-exchange/" target="_blank">LinkedIn</a>
-        </span><br>
-        <img src="images/email_image.png" alt="Global Innovation Exchange — University of Washington" class="sig-logo">
-        <div class="sig-social">
-          <a href="#" class="social-icon"><i class="fa-brands fa-facebook-f"></i></a>
-          <a href="#" class="social-icon"><i class="fa-brands fa-instagram"></i></a>
-          <a href="#" class="social-icon"><i class="fa-brands fa-x-twitter"></i></a>
-          <a href="#" class="social-icon"><i class="fa-brands fa-linkedin-in"></i></a>
+    <div class="email-preview" style="padding:0;display:flex;flex-direction:column;">
+      <textarea class="email-editable" id="email-preview-body"></textarea>
+      <div style="padding:0 18px 18px 18px">
+        <hr class="sig-divider">
+        <div class="sig-block">
+          Master of Science in Technology Innovation<br>
+          Global Innovation Exchange (GIX)<br>
+          University of Washington<br>
+          <span class="sig-links">
+            <a href="mailto:joinmsti@uw.edu">joinmsti@uw.edu</a> |
+            <a href="https://gix.uw.edu" target="_blank">GIX</a> |
+            <a href="https://www.linkedin.com/school/gix-global-innovation-exchange/" target="_blank">LinkedIn</a>
+          </span><br>
+          <img src="images/email_image.png" alt="Global Innovation Exchange — University of Washington" class="sig-logo">
+          <div class="sig-social">
+            <a href="#" class="social-icon"><i class="fa-brands fa-facebook-f"></i></a>
+            <a href="#" class="social-icon"><i class="fa-brands fa-instagram"></i></a>
+            <a href="#" class="social-icon"><i class="fa-brands fa-x-twitter"></i></a>
+            <a href="#" class="social-icon"><i class="fa-brands fa-linkedin-in"></i></a>
+          </div>
         </div>
       </div>
     </div>
