@@ -784,6 +784,35 @@
     .mf-add { background: #fafafa; border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin: 14px 0 0; }
     .mf-add h4 { font-size: 12px; font-weight: 700; margin-bottom: 10px; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); }
     .mf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+
+    /* ── Editable email + date slots ── */
+    .email-editable {
+      width: 100%; border: 1px solid #e0d9f5; border-radius: 6px;
+      padding: 16px; font-size: 13px; font-family: inherit;
+      line-height: 1.7; resize: vertical; min-height: 220px; max-height: 340px;
+      outline: none; background: #f9f8ff; color: var(--text);
+    }
+    .email-editable:focus { border-color: var(--purple); }
+    .slot-section { margin-bottom: 14px; }
+    .slot-rows { display: flex; flex-direction: column; gap: 7px; }
+    .slot-row { display: flex; align-items: center; gap: 8px; }
+    .slot-num { font-size: 11px; font-weight: 700; color: var(--muted); width: 16px; flex-shrink: 0; }
+    .slot-date, .slot-time {
+      border: 1px solid var(--border); border-radius: 6px;
+      padding: 5px 9px; font-size: 12px; font-family: inherit;
+      outline: none; color: var(--text); background: white;
+    }
+    .slot-date { flex: 1; }
+    .slot-time { width: 108px; }
+    .slot-date:focus, .slot-time:focus { border-color: var(--purple); }
+    .slot-tz { font-size: 11px; color: var(--muted); font-weight: 600; }
+    .email-reset-btn {
+      font-size: 11px; color: var(--muted); background: none; border: none;
+      cursor: pointer; font-family: inherit; padding: 0; margin-left: auto;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .email-reset-btn:hover { color: var(--purple); }
+    .email-label-row { display: flex; align-items: center; margin-bottom: 6px; }
   </style>
 </head>
 <body>
@@ -861,11 +890,28 @@
 
 <!-- Email modal -->
 <div id="email-modal-backdrop" class="modal-backdrop" style="display:none" onclick="closeEmailModal(event)">
-  <div class="modal" id="email-modal-box">
+  <div class="modal" id="email-modal-box" style="width:600px;max-height:92vh;overflow-y:auto">
     <h2 id="email-modal-title">Send Intro Email</h2>
     <p class="modal-sub" id="email-modal-sub"></p>
-    <div class="email-section-label">EMAIL PREVIEW</div>
-    <div class="email-preview" id="email-preview-body"></div>
+
+    <!-- Available dates (intro only) -->
+    <div id="email-slots-section" class="slot-section">
+      <div class="email-section-label" style="margin-bottom:6px">YOUR AVAILABLE DATES</div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:10px">These will appear in your email. Edit any slot or change the times to match your schedule.</p>
+      <div class="slot-rows">
+        <div class="slot-row"><span class="slot-num">1</span><input type="date" class="slot-date" id="slot-date-0" onchange="updateEmailSlots()"><input type="time" class="slot-time" id="slot-time-0" onchange="updateEmailSlots()"><span class="slot-tz">PT</span></div>
+        <div class="slot-row"><span class="slot-num">2</span><input type="date" class="slot-date" id="slot-date-1" onchange="updateEmailSlots()"><input type="time" class="slot-time" id="slot-time-1" onchange="updateEmailSlots()"><span class="slot-tz">PT</span></div>
+        <div class="slot-row"><span class="slot-num">3</span><input type="date" class="slot-date" id="slot-date-2" onchange="updateEmailSlots()"><input type="time" class="slot-time" id="slot-time-2" onchange="updateEmailSlots()"><span class="slot-tz">PT</span></div>
+      </div>
+    </div>
+
+    <!-- Editable email body -->
+    <div class="email-label-row">
+      <div class="email-section-label" style="margin-bottom:0">EMAIL CONTENT</div>
+      <button class="email-reset-btn" onclick="resetEmailBody()" title="Restore original template"><i class="fa-solid fa-rotate-left" style="font-size:11px"></i> Reset to template</button>
+    </div>
+    <textarea class="email-editable" id="email-preview-body"></textarea>
+
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeEmailModal()">Cancel</button>
       <button class="btn btn-primary" id="email-modal-send-btn">Send Email</button>
@@ -1533,6 +1579,27 @@ function confirmDone(reqId) {
 // Email modal
 // ─────────────────────────────────────────
 
+// ── Date slot helpers ──
+function addDays(n) { const d = new Date(); d.setDate(d.getDate() + n); return d; }
+function isoDate(d) { return d.toISOString().slice(0, 10); }
+function fmtSlot(dateVal, timeVal) {
+  if (!dateVal) return null;
+  const d = new Date(dateVal + 'T12:00:00');
+  const dayStr = d.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+  if (!timeVal) return dayStr;
+  const [h, m] = timeVal.split(':').map(Number);
+  const ampm = h >= 12 ? 'pm' : 'am';
+  const hr = h % 12 || 12;
+  return `${dayStr}, ${hr}:${m === 0 ? '00' : m} ${ampm} PT`;
+}
+function getSlotsLines() {
+  return [0, 1, 2].map(i => {
+    const d = document.getElementById(`slot-date-${i}`)?.value;
+    const t = document.getElementById(`slot-time-${i}`)?.value;
+    return fmtSlot(d, t);
+  }).filter(Boolean).map(s => `  → ${s}`).join('\n');
+}
+
 function openEmailModal(reqId, type) {
   const r = requests.find(x => x.id === reqId);
   const amb = AMBASSADORS.find(a => a.id === currentAmbId);
@@ -1543,17 +1610,49 @@ function openEmailModal(reqId, type) {
 
   const isFollowup = type === 'followup';
   document.getElementById("email-modal-title").textContent = isFollowup ? "Send Follow-up Email" : "Send Intro Email";
-  document.getElementById("email-modal-sub").textContent =
-    `To: ${r.studentName} <${r.studentEmail}>`;
+  document.getElementById("email-modal-sub").textContent = `To: ${r.studentName} <${r.studentEmail}>`;
 
-  const emailBody = isFollowup
-    ? buildFollowupEmail(r, amb)
-    : buildIntroEmail(r, amb);
+  // Show/hide date slots section
+  document.getElementById("email-slots-section").style.display = isFollowup ? "none" : "";
 
-  document.getElementById("email-preview-body").innerHTML = emailBody;
+  // Pre-populate date slots
+  if (!isFollowup) {
+    const defaults = [
+      { d: addDays(2), t: "10:00" },
+      { d: addDays(4), t: "14:00" },
+      { d: addDays(7), t: "11:00" },
+    ];
+    defaults.forEach((s, i) => {
+      document.getElementById(`slot-date-${i}`).value = isoDate(s.d);
+      document.getElementById(`slot-time-${i}`).value = s.t;
+    });
+  }
+
+  document.getElementById("email-preview-body").value = isFollowup
+    ? buildFollowupEmailText(r, amb)
+    : buildIntroEmailText(r, amb);
 
   document.getElementById("email-modal-send-btn").onclick = () => sendEmail(reqId, type);
   document.getElementById("email-modal-backdrop").style.display = "flex";
+}
+
+function updateEmailSlots() {
+  // Rebuild just the slots section in the textarea
+  const ta = document.getElementById("email-preview-body");
+  const text = ta.value;
+  const newSlots = getSlotsLines();
+  // Replace lines starting with "  →" block
+  const updated = text.replace(/( {0,2}→ .+\n?)+/, newSlots + '\n');
+  ta.value = updated !== text ? updated : text;
+}
+
+function resetEmailBody() {
+  const r = requests.find(x => x.id === emailModalReqId);
+  const amb = AMBASSADORS.find(a => a.id === currentAmbId);
+  if (!r || !amb) return;
+  document.getElementById("email-preview-body").value = emailModalType === 'followup'
+    ? buildFollowupEmailText(r, amb)
+    : buildIntroEmailText(r, amb);
 }
 
 function closeEmailModal(e) {
@@ -1562,31 +1661,43 @@ function closeEmailModal(e) {
   emailModalReqId = null;
 }
 
-function emailSignature(amb) {
-  return `<div class="email-sig">
-  <strong>${amb.name}</strong><br>
-  MSTI ${amb.type === 'alumni' ? 'Alumni' : 'Student'} Ambassador<br>
-  University of Washington
-  <div style="margin-top:10px">
-    <img src="images/email_image.png" alt="GIX" style="height:60px;display:block;" />
-  </div>
-  <div class="sig-social" style="margin-top:8px">
-    <a href="#" title="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
-    <a href="#" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
-    <a href="#" title="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
-    <a href="#" title="X / Twitter"><i class="fa-brands fa-x-twitter"></i></a>
-  </div>
-</div>`;
+function buildIntroEmailText(r, amb) {
+  const firstName = r.studentName.split(' ')[0];
+  const slots = getSlotsLines();
+  const role = amb.type === 'alumni' ? 'Alumni Ambassador' : 'Student Ambassador';
+  return `Hi ${firstName},
+
+I hope you're doing well! My name is ${amb.name}, and I'm a current MSTI ${amb.type === 'alumni' ? 'alumni' : 'student'} at the University of Washington. I was matched with you through the MSTI Coffee Chat Program and I'd love to connect to answer any questions you have about the program.
+
+I'm available on the following dates — feel free to pick whichever works for you, or suggest another time that's more convenient:
+
+${slots}
+
+We can connect via Zoom, by email, or in person if you're nearby. Feel free to ask about the MSTI curriculum, student life, projects, the GIX community, living in the Seattle/Bellevue area, or anything else you're curious about.
+
+Looking forward to connecting!
+
+Best,
+${amb.name}
+MSTI ${role}
+University of Washington`;
 }
 
-function buildIntroEmail(r, amb) {
+function buildFollowupEmailText(r, amb) {
   const firstName = r.studentName.split(' ')[0];
-  return `<div><p>Hi ${firstName},</p><p>I hope you're doing well! My name is ${amb.name}, and I'm a current MSTI student at the University of Washington. I was matched with you through the MSTI Coffee Chat Program, and I'd be happy to connect and answer any questions you may have about the program.</p><p>We can connect in whatever format works best for you, whether over Zoom, by email, or in person if you're nearby. Feel free to ask about the MSTI curriculum, student life, projects, the GIX community, living in the Seattle/Bellevue area, or anything else you're curious about.</p><p>Please feel free to send me a few times that work for you, or let me know if you'd prefer to ask questions over email instead.</p><p>Looking forward to connecting with you!</p><p>Best,</p>${emailSignature(amb)}</div>`;
-}
+  const role = amb.type === 'alumni' ? 'Alumni Ambassador' : 'Student Ambassador';
+  return `Hi ${firstName},
 
-function buildFollowupEmail(r, amb) {
-  const firstName = r.studentName.split(' ')[0];
-  return `<div><p>Hi ${firstName},</p><p>I hope you're doing well! My name is ${amb.name}, and I'm a current MSTI student at the University of Washington. I was matched with you through the MSTI Coffee Chat Program, and I'd be happy to connect and answer any questions you may have about the program.</p><p>We can connect in whatever format works best for you, whether over Zoom, by email, or in person if you're nearby. Feel free to ask about the MSTI curriculum, student life, projects, the GIX community, living in the Seattle/Bellevue area, or anything else you're curious about.</p><p>Please feel free to send me a few times that work for you, or let me know if you'd prefer to ask questions over email instead.</p><p>Looking forward to connecting with you!</p><p>Best,</p>${emailSignature(amb)}</div>`;
+I just wanted to follow up on my previous message — I'd still love to connect and chat about the MSTI program whenever you have some time.
+
+Feel free to reach out with any questions over email if that's easier, or suggest a time that works for you and we can set up a quick Zoom call.
+
+Looking forward to hearing from you!
+
+Best,
+${amb.name}
+MSTI ${role}
+University of Washington`;
 }
 
 function sendEmail(reqId, type) {
