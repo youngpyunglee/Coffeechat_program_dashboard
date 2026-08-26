@@ -1638,14 +1638,14 @@ const DEFAULT_FACULTY = [
   { id:10,name:"Jack Hatcher",    role:"Assistant Lab Manager; UW MSTI 2024",                  email:"jhat@uw.edu" },
 ];
 
-// Topic → faculty id order (first = recommended)
+// Topic → faculty id order (first = recommended, always include core 4: Kyle=3, Kara=9, Patrick=6, Jason=8)
 const TOPIC_FAC = {
-  "Academics & Curriculum":      [9, 8, 1],
-  "Research Opportunities":      [1, 2, 9],
-  "Financial Aid / Scholarships":[3, 9],
-  "Career Paths":                [6, 4, 5],
-  "Admissions Process":          [3, 8],
-  "Campus Life":                 [7, 10, 4],
+  "Academics & Curriculum":      [9, 8, 3, 6],       // Kara leads, + Jason, Kyle, Patrick
+  "Research Opportunities":      [1, 9, 8, 3, 6],    // Kevin leads, + core 4
+  "Financial Aid / Scholarships":[3, 9, 8, 6],       // Kyle leads, + Kara, Jason, Patrick
+  "Career Paths":                [6, 3, 9, 8],       // Patrick leads, + Kyle, Kara, Jason
+  "Admissions Process":          [3, 8, 9, 6],       // Kyle leads, + Jason, Kara, Patrick
+  "Campus Life":                 [7, 9, 8, 3, 6],    // Taryn leads, + core 4
 };
 
 function loadFaculty() {
