@@ -497,16 +497,24 @@
     }
 
     .email-preview p { margin-bottom: 12px; }
-    .email-preview .sig-divider { border: none; border-top: 1px solid #ccc; margin: 16px 0 10px; width: 200px; }
-    .email-preview .sig-block { font-size: 12px; line-height: 1.6; color: #333; }
-    .email-preview .sig-links a { color: #4b2e83; text-decoration: none; }
-    .email-preview .sig-links a:hover { text-decoration: underline; }
-    .email-preview .sig-logo { margin-top: 10px; height: 48px; display: block; }
-    .email-preview .sig-social { display: flex; gap: 14px; margin-top: 12px; align-items: center; }
-    .email-preview .social-icon { color: #000; font-size: 20px; text-decoration: none; line-height: 1; }
-    .email-preview .social-icon:hover { color: #444; }
+    .email-preview .sig-divider,
+    .email-sig-footer .sig-divider { border: none; border-top: 1px solid #ccc; margin: 16px 0 10px; width: 200px; }
+    .email-preview .sig-block,
+    .email-sig-footer .sig-block { font-size: 12px; line-height: 1.6; color: #333; }
+    .email-preview .sig-links a,
+    .email-sig-footer .sig-links a { color: #4b2e83; text-decoration: none; }
+    .email-preview .sig-links a:hover,
+    .email-sig-footer .sig-links a:hover { text-decoration: underline; }
+    .email-preview .sig-logo,
+    .email-sig-footer .sig-logo { margin-top: 10px; height: 48px; display: block; max-width: 100%; }
+    .email-preview .sig-social,
+    .email-sig-footer .sig-social { display: flex; gap: 14px; margin-top: 12px; align-items: center; }
+    .email-preview .social-icon,
+    .email-sig-footer .social-icon { color: #000; font-size: 20px; text-decoration: none; line-height: 1; }
+    .email-preview .social-icon:hover,
+    .email-sig-footer .social-icon:hover { color: #444; }
 
-    .email-sig-footer { background: #f9f8ff; border: 1px solid #e0d9f5; border-top: none; border-radius: 0 0 6px 6px; padding: 12px 16px 16px; font-size: 12px; line-height: 1.6; color: #333; }
+    .email-sig-footer { background: #f9f8ff; border: 1px solid #e0d9f5; border-top: none; border-radius: 0 0 6px 6px; padding: 4px 16px 16px; }
 
     .email-section-label {
       font-size: 10px;
@@ -989,7 +997,7 @@
 
     <!-- GIX signature (visually joined to textarea above) -->
     <div class="email-sig-footer">
-      <hr class="sig-divider" style="border:none;border-top:1px solid #ccc;margin:0 0 10px;width:200px">
+      <hr class="sig-divider">
       <div class="sig-block">
         Master of Science in Technology Innovation<br>
         Global Innovation Exchange (GIX)<br>
