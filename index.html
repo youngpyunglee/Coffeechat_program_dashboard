@@ -523,6 +523,17 @@
     .amb-name { font-weight: 500; font-size: 13px; }
     .amb-cohort { color: var(--muted); font-size: 11px; }
 
+    /* ── Email action button ── */
+    .action-email-btn {
+      width: 30px; height: 30px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 6px; border: 1px solid var(--border);
+      background: white; color: var(--purple);
+      font-size: 14px; cursor: pointer;
+      transition: all .12s;
+    }
+    .action-email-btn:hover { background: #ede8f8; border-color: var(--purple); }
+
     /* ── Kebab menu ── */
     .kebab-wrap { position: relative; display: flex; justify-content: flex-end; }
 
@@ -1683,9 +1694,10 @@ function buildActions(r, amb) {
   }
 
   let items = [];
+  let emailBtn = '';
 
   if (r.status === "Pending Assignment") {
-    items.push(`<div class="kebab-item" onclick="closeAllKebabs();openIntroModal(${r.id})">Send intro email <span class="ki-icon">✉</span></div>`);
+    emailBtn = `<button class="action-email-btn" title="Send intro email" onclick="event.stopPropagation();openIntroModal(${r.id})"><i class="fa-regular fa-envelope"></i></button>`;
   }
   if (r.status === "Intro Sent") {
     items.push(`<div class="kebab-item" onclick="closeAllKebabs();openIntroModal(${r.id})">Resend intro email <span class="ki-icon">↻</span></div>`);
@@ -1695,7 +1707,7 @@ function buildActions(r, amb) {
     items.push(`<div class="kebab-item" onclick="closeAllKebabs();advanceStatus(${r.id})">Mark chat completed <span class="ki-icon">✓</span></div>`);
   }
   if (r.status === "Chat Completed") {
-    items.push(`<div class="kebab-item" onclick="closeAllKebabs();openFeedbackModal(${r.id})">Send feedback form <span class="ki-icon">↗</span></div>`);
+    emailBtn = `<button class="action-email-btn" title="Send feedback form" onclick="event.stopPropagation();openFeedbackModal(${r.id})"><i class="fa-regular fa-envelope"></i></button>`;
   }
   if (r.status === "Feedback Sent") {
     items.push(`<div class="kebab-item" onclick="closeAllKebabs();advanceStatus(${r.id})">Mark feedback received <span class="ki-icon">✓</span></div>`);
@@ -1711,7 +1723,8 @@ function buildActions(r, amb) {
     items.push(`<div class="kebab-item" onclick="closeAllKebabs();changeAmbassador(${r.id})">Reassign ambassador <span class="ki-icon">⟳</span></div>`);
   }
 
-  return `<div class="kebab-wrap">
+  return `<div class="kebab-wrap" style="gap:4px">
+    ${emailBtn}
     <button class="kebab-btn" onclick="toggleKebab(${r.id}, event, this)" aria-label="Actions">⋮</button>
     <div class="kebab-menu" id="kebab-${r.id}" onclick="event.stopPropagation()">
       ${items.join('')}
