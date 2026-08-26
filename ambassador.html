@@ -1847,19 +1847,16 @@ function openEmailModal(reqId, type) {
   document.getElementById("email-modal-title").textContent = isFollowup ? "Send Follow-up Email" : "Send Intro Email";
   document.getElementById("email-modal-sub").textContent = `To: ${r.studentName} <${r.studentEmail}>`;
 
-  // Show/hide date slots section
-  document.getElementById("email-slots-section").style.display = isFollowup ? "none" : "";
+  // Always show date slots (both intro and follow-up)
+  document.getElementById("email-slots-section").style.display = "";
 
   // Initialize date slots
-  if (!isFollowup) {
-    document.getElementById('slot-tz-select').value = 'PT';
-    tpInitCols();
-    document.getElementById('tp-popup').style.display = 'none';
-    // Reset to 1 slot pre-filled with today+2
-    slotCount = 0;
-    document.getElementById('slot-rows').innerHTML = '';
-    addSlot(isoDate(addDays(2)), '10:00');
-  }
+  document.getElementById('slot-tz-select').value = 'PT';
+  tpInitCols();
+  document.getElementById('tp-popup').style.display = 'none';
+  slotCount = 0;
+  document.getElementById('slot-rows').innerHTML = '';
+  addSlot(isoDate(addDays(2)), '10:00');
 
   document.getElementById("email-preview-body").value = isFollowup
     ? buildFollowupEmailText(r, amb)
@@ -1919,11 +1916,16 @@ University of Washington`;
 function buildFollowupEmailText(r, amb) {
   const firstName = r.studentName.split(' ')[0];
   const role = amb.type === 'alumni' ? 'Alumni Ambassador' : 'Student Ambassador';
+  const slots = getSlotsLines();
   return `Hi ${firstName},
 
 I just wanted to follow up on my previous message — I'd still love to connect and chat about the MSTI program whenever you have some time.
 
-Feel free to reach out with any questions over email if that's easier, or suggest a time that works for you and we can set up a quick Zoom call.
+In case it helps, here are a few times I'm available:
+
+${slots}
+
+Feel free to pick whichever works, suggest another time, or just reach out over email if that's easier.
 
 Looking forward to hearing from you!
 
