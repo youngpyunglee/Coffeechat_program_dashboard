@@ -1247,12 +1247,12 @@
 // ─────────────────────────────────────────
 
 const AMBASSADORS = [
-  { id: 1, name: "Sarah Kim",       email: "skim@uw.edu",      cohort: "C9",  type: "student", linkedin: "linkedin.com/in/sarahkim" },
-  { id: 2, name: "Marcus Chen",     email: "mchen@uw.edu",     cohort: "C8",  type: "student", linkedin: "linkedin.com/in/marcuschen" },
-  { id: 3, name: "Priya Patel",     email: "ppatel@uw.edu",    cohort: "C9",  type: "student", linkedin: "linkedin.com/in/priyapatel" },
-  { id: 4, name: "James O\'Brien",  email: "jobrien@uw.edu",   cohort: "C6",  type: "alumni",  linkedin: "linkedin.com/in/jamesobrien" },
-  { id: 5, name: "Leila Nazari",    email: "lnazari@uw.edu",   cohort: "C9",  type: "student", linkedin: "linkedin.com/in/leilanazari" },
-  { id: 6, name: "David Park",      email: "dpark@uw.edu",     cohort: "C7",  type: "alumni",  linkedin: "linkedin.com/in/davidpark" },
+  { id: 1, name: "Cidney Ho",       email: "cidney@uw.edu",   cohort: "C9", type: "student", track: "Robotics",         location: "Seattle", phone: "+1 425 532-1329", linkedin: "linkedin.com/in/cidneyho" },
+  { id: 2, name: "Rebecca Yang",    email: "qianmu@uw.edu",   cohort: "C9", type: "student", track: "Connected Device", location: "Seattle", phone: "+1 646 954-4077", linkedin: "linkedin.com/in/-rebeccayang" },
+  { id: 3, name: "Youngpyung Lee",  email: "yplee948@uw.edu", cohort: "C9", type: "student", track: "Connected Device", location: "Seattle", phone: "+1 425 568-8929", linkedin: "linkedin.com/in/youngpyunglee" },
+  { id: 4, name: "Anthony Chen",    email: "aechen@uw.edu",   cohort: "C9", type: "student", track: "Robotics",         location: "Seattle", phone: "+1 980 474-6939", linkedin: "linkedin.com/in/anthony-tony-chen" },
+  { id: 5, name: "Lisa Li",         email: "lisa115@uw.edu",  cohort: "C9", type: "student", track: "Connected Device", location: "Seattle", phone: "+1 646 229-6924", linkedin: "linkedin.com/in/ziyingli2001" },
+  { id: 6, name: "Daniel Zelinger", email: "danzel@uw.edu",   cohort: "C9", type: "student", track: "Connected Device", location: "Seattle", phone: "",                  linkedin: "linkedin.com/in/daniel-zelinger" },
 ];
 
 const STATUS_CLASSES = {
@@ -1278,7 +1278,7 @@ let requests = [
     notes: "",
     activityLog: [
       { date: "2026-06-18", action: "Request submitted", type: "created" },
-      { date: "2026-06-19", action: "Assigned to David Park", type: "status" },
+      { date: "2026-06-19", action: "Assigned to Daniel Zelinger", type: "status" },
     ],
   },
   {
@@ -1294,7 +1294,7 @@ let requests = [
     notes: "",
     activityLog: [
       { date: "2026-06-16", action: "Request submitted", type: "created" },
-      { date: "2026-06-17", action: "Ambassador assigned: Sarah Kim", type: "assigned" },
+      { date: "2026-06-17", action: "Ambassador assigned: Cidney Ho", type: "assigned" },
       { date: "2026-06-17", action: "Intro email sent by coordinator", type: "status" },
     ],
   },
@@ -1311,7 +1311,7 @@ let requests = [
     notes: "",
     activityLog: [
       { date: "2026-06-14", action: "Request submitted", type: "created" },
-      { date: "2026-06-14", action: "Ambassador assigned: Priya Patel", type: "assigned" },
+      { date: "2026-06-14", action: "Ambassador assigned: Youngpyung Lee", type: "assigned" },
       { date: "2026-06-14", action: "Intro email sent by coordinator", type: "status" },
       { date: "2026-06-15", action: "Ambassador confirmed availability", type: "status" },
     ],
@@ -1329,7 +1329,7 @@ let requests = [
     notes: "Student mentioned interest in the Design track specifically.",
     activityLog: [
       { date: "2026-06-10", action: "Request submitted", type: "created" },
-      { date: "2026-06-10", action: "Ambassador assigned: Marcus Chen", type: "assigned" },
+      { date: "2026-06-10", action: "Ambassador assigned: Rebecca Yang", type: "assigned" },
       { date: "2026-06-11", action: "Intro email sent by coordinator", type: "status" },
       { date: "2026-06-12", action: "Ambassador confirmed availability", type: "status" },
       { date: "2026-06-13", action: "Chat completed", type: "status" },
@@ -1348,7 +1348,7 @@ let requests = [
     notes: "",
     activityLog: [
       { date: "2026-06-05", action: "Request submitted", type: "created" },
-      { date: "2026-06-06", action: "Ambassador assigned: James O\'Brien", type: "assigned" },
+      { date: "2026-06-06", action: "Ambassador assigned: Anthony Chen", type: "assigned" },
       { date: "2026-06-07", action: "Intro email sent by coordinator", type: "status" },
       { date: "2026-06-09", action: "Ambassador confirmed availability", type: "status" },
       { date: "2026-06-11", action: "Chat completed", type: "status" },
@@ -1368,7 +1368,7 @@ let requests = [
     notes: "Very positive feedback.",
     activityLog: [
       { date: "2026-05-30", action: "Request submitted", type: "created" },
-      { date: "2026-05-31", action: "Ambassador assigned: Leila Nazari", type: "assigned" },
+      { date: "2026-05-31", action: "Ambassador assigned: Lisa Li", type: "assigned" },
       { date: "2026-06-01", action: "Intro email sent by coordinator", type: "status" },
       { date: "2026-06-02", action: "Ambassador confirmed availability", type: "status" },
       { date: "2026-06-05", action: "Chat completed", type: "status" },
@@ -1389,7 +1389,7 @@ let requests = [
     notes: "",
     activityLog: [
       { date: "2026-06-08", action: "Request submitted", type: "created" },
-      { date: "2026-06-08", action: "Ambassador assigned: David Park", type: "assigned" },
+      { date: "2026-06-08", action: "Ambassador assigned: Daniel Zelinger", type: "assigned" },
       { date: "2026-06-09", action: "Intro email sent by coordinator", type: "status" },
     ],
   },
@@ -1406,7 +1406,7 @@ let requests = [
     notes: "",
     activityLog: [
       { date: "2026-06-01", action: "Request submitted", type: "created" },
-      { date: "2026-06-01", action: "Ambassador assigned: Marcus Chen", type: "assigned" },
+      { date: "2026-06-01", action: "Ambassador assigned: Rebecca Yang", type: "assigned" },
       { date: "2026-06-02", action: "Intro email sent by coordinator", type: "status" },
     ],
   },
@@ -1423,7 +1423,7 @@ let requests = [
     notes: "",
     activityLog: [
       { date: "2026-06-17", action: "Request submitted", type: "created" },
-      { date: "2026-06-18", action: "Assigned to James O'Brien", type: "status" },
+      { date: "2026-06-18", action: "Assigned to Anthony Chen", type: "status" },
     ],
   },
   {
@@ -1439,7 +1439,7 @@ let requests = [
     notes: "",
     activityLog: [
       { date: "2026-06-11", action: "Request submitted", type: "created" },
-      { date: "2026-06-11", action: "Ambassador assigned: Priya Patel", type: "assigned" },
+      { date: "2026-06-11", action: "Ambassador assigned: Youngpyung Lee", type: "assigned" },
       { date: "2026-06-12", action: "Intro email sent by coordinator", type: "status" },
       { date: "2026-06-13", action: "Ambassador confirmed availability", type: "status" },
       { date: "2026-06-14", action: "Chat completed", type: "status" },
@@ -1540,7 +1540,7 @@ function renderDashboard() {
     <div class="amb-big-avatar">${initials(amb.name)}</div>
     <div class="welcome-info">
       <h2>Welcome, ${amb.name.split(' ')[0]}!</h2>
-      <p>${amb.cohort} · ${amb.type === 'alumni' ? 'Alumni Ambassador' : 'Student Ambassador'} · ${amb.email}</p>
+      <p>${amb.cohort}${amb.track ? ' · ' + amb.track : ''} · ${amb.type === 'alumni' ? 'Alumni Ambassador' : 'Student Ambassador'} · ${amb.email}</p>
     </div>
     <div class="welcome-stats">
       <div>
