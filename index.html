@@ -578,6 +578,9 @@
       font-weight: 600;
     }
 
+    tbody tr.row-stalled { background: #fff5f5; }
+    tbody tr.row-stalled:hover { background: #fee2e2; }
+
     /* ── Empty state ── */
     .empty-row td {
       text-align: center;
@@ -1413,6 +1416,7 @@ let requests = [
 
 let nextId = 11;
 let activeFilter = "all";
+let filterAmbId = null;
 let searchQuery = "";
 let currentPage = 1;
 const PAGE_SIZE = 8;
@@ -1478,14 +1482,15 @@ function renderStats() {
 
 function filteredRequests() {
   return requests.filter(r => {
-    const es = effectiveStatus(r);
     const inProgress = ["Intro Sent","Ambassador Confirmed","Chat Completed","Feedback Sent"].includes(r.status);
 
     let passFilter = true;
-    if (activeFilter === "pending")   passFilter = r.status === "Pending Assignment";
+    if (activeFilter === "pending")        passFilter = r.status === "Pending Assignment";
     else if (activeFilter === "active")    passFilter = inProgress && !isStalled(r);
     else if (activeFilter === "stalled")   passFilter = isStalled(r);
-    else if (activeFilter === "completed") passFilter = r.status === "Feedback Received";
+    else if (activeFilter === "completed") passFilter = ["Chat Completed","Feedback Sent","Feedback Received"].includes(r.status);
+
+    const passAmb = !filterAmbId || r.ambId === filterAmbId;
 
     const q = searchQuery.toLowerCase();
     const passSearch = !q ||
@@ -1493,7 +1498,7 @@ function filteredRequests() {
       r.studentEmail.toLowerCase().includes(q) ||
       (r.ambId && AMBASSADORS.find(a=>a.id===r.ambId)?.name.toLowerCase().includes(q));
 
-    return passFilter && passSearch;
+    return passFilter && passAmb && passSearch;
   }).sort((a, b) => new Date(b.submitted) - new Date(a.submitted));
 }
 
@@ -1544,7 +1549,7 @@ function renderTable() {
 
     const avatarInitials = r.studentName.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
 
-    return `<tr data-id="${r.id}" onclick="openDetailPanel(${r.id})" style="cursor:pointer">
+    return `<tr data-id="${r.id}" onclick="openDetailPanel(${r.id})" style="cursor:pointer" class="${isStalled(r) ? 'row-stalled' : ''}">
       <td>
         <div class="student-cell">
           <div class="student-avatar">${avatarInitials}</div>
@@ -1690,7 +1695,7 @@ function buildActions(r, amb) {
     items.push(`<div class="kebab-item" onclick="closeAllKebabs();advanceStatus(${r.id})">Mark chat completed <span class="ki-icon">✓</span></div>`);
   }
   if (r.status === "Chat Completed") {
-    items.push(`<div class="kebab-item" onclick="closeAllKebabs();sendFeedback(${r.id})">Send feedback form <span class="ki-icon">↗</span></div>`);
+    items.push(`<div class="kebab-item" onclick="closeAllKebabs();openFeedbackModal(${r.id})">Send feedback form <span class="ki-icon">↗</span></div>`);
   }
   if (r.status === "Feedback Sent") {
     items.push(`<div class="kebab-item" onclick="closeAllKebabs();advanceStatus(${r.id})">Mark feedback received <span class="ki-icon">✓</span></div>`);
@@ -1761,12 +1766,53 @@ function advanceStatus(reqId) {
   }
 }
 
-function sendFeedback(reqId) {
+function openFeedbackModal(reqId) {
+  const req = requests.find(r => r.id === reqId);
+  const amb = AMBASSADORS.find(a => a.id === req.ambId);
+  const studentFirst = req.studentName.split(' ')[0];
+
+  document.getElementById("modal-title").textContent = "Send Feedback Form";
+  document.getElementById("modal-sub").textContent = `To: ${req.studentEmail}`;
+  document.getElementById("email-preview").innerHTML = `
+    <p><strong>Subject: How was your MSTI Coffee Chat? We'd love your feedback!</strong></p>
+    <p>Hi ${studentFirst},</p>
+    <p>Thank you for connecting with <strong>${amb.name}</strong> as part of the MSTI Coffee Chat Program! We hope the conversation gave you a better sense of the program and what to expect.</p>
+    <p>We'd love to hear about your experience. Your feedback helps us improve the program for future prospective students. It only takes 2–3 minutes.</p>
+    <p><a href="#" style="display:inline-block;background:#4b2e83;color:white;padding:10px 20px;border-radius:8px;text-decoration:none;font-weight:600">Share your feedback →</a></p>
+    <p>Thank you, and we hope to see you in the MSTI program!</p>
+    <p>Best,<br>MSTI Admissions Ambassadors</p>
+    <hr class="sig-divider">
+    <div class="sig-block">
+      Master of Science in Technology Innovation<br>
+      Global Innovation Exchange (GIX)<br>
+      University of Washington<br>
+      <span class="sig-links">
+        <a href="mailto:joinmsti@uw.edu">joinmsti@uw.edu</a> |
+        <a href="https://gix.uw.edu" target="_blank">GIX</a> |
+        <a href="https://www.linkedin.com/school/gix-global-innovation-exchange/" target="_blank">LinkedIn</a>
+      </span><br>
+      <img src="images/email_image.png" alt="Global Innovation Exchange — University of Washington" class="sig-logo">
+      <div class="sig-social">
+        <a href="#" class="social-icon"><i class="fa-brands fa-facebook-f"></i></a>
+        <a href="#" class="social-icon"><i class="fa-brands fa-instagram"></i></a>
+        <a href="#" class="social-icon"><i class="fa-brands fa-x-twitter"></i></a>
+        <a href="#" class="social-icon"><i class="fa-brands fa-linkedin-in"></i></a>
+      </div>
+    </div>
+  `;
+  document.getElementById("modal-confirm-btn").textContent = "Send Email";
+  document.getElementById("modal-confirm-btn").onclick = () => confirmSendFeedback(reqId);
+  document.getElementById("modal-backdrop").style.display = "flex";
+  pendingModalReqId = reqId;
+}
+
+function confirmSendFeedback(reqId) {
   const req = requests.find(r => r.id === reqId);
   req.status = "Feedback Sent";
   req.statusUpdated = today();
   req.activityLog.push({ date: today(), action: "Feedback form sent to student", type: "status" });
-  toast("Feedback form sent to student (simulated)", "success");
+  closeModal();
+  toast(`Feedback form sent to ${req.studentName}`, "success");
   re();
 }
 
@@ -1936,6 +1982,7 @@ document.getElementById("filter-tabs").addEventListener("click", e => {
   document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
   e.target.classList.add("active");
   activeFilter = e.target.dataset.filter;
+  filterAmbId = null;
   currentPage = 1;
   re();
 });
@@ -1963,6 +2010,22 @@ function switchView(view, btn) {
   closeDetailPanel();
 }
 
+function filterByAmb(ambId, filter) {
+  const amb = AMBASSADORS.find(a => a.id === ambId);
+  filterAmbId = ambId;
+  activeFilter = filter;
+  currentPage = 1;
+  document.querySelectorAll('.view-tab').forEach(t => t.classList.remove('active'));
+  document.querySelector('.view-tab[onclick*="requests"]').classList.add('active');
+  document.getElementById('view-requests').style.display = '';
+  document.getElementById('view-ambassadors').style.display = 'none';
+  document.querySelectorAll('.tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.filter === filter);
+  });
+  document.getElementById('main-title').textContent = `${amb.name}'s Requests`;
+  re();
+}
+
 // ─────────────────────────────────────────
 // Detail panel
 // ─────────────────────────────────────────
@@ -1978,6 +2041,27 @@ function openDetailPanel(reqId) {
 function closeDetailPanel() {
   detailPanelReqId = null;
   document.getElementById('detail-panel').classList.remove('open');
+}
+
+function buildDetailActions(r, amb) {
+  if (!r.ambId) return '';
+  const btns = [];
+  if (r.status === "Pending Assignment")
+    btns.push(`<button class="btn btn-primary btn-sm" onclick="closeDetailPanel();openIntroModal(${r.id})"><i class="fa-regular fa-envelope"></i> Send intro email</button>`);
+  if (r.status === "Intro Sent") {
+    btns.push(`<button class="btn btn-primary btn-sm" onclick="closeDetailPanel();advanceStatus(${r.id})"><i class="fa-solid fa-check"></i> Mark confirmed</button>`);
+    btns.push(`<button class="btn btn-outline btn-sm" onclick="closeDetailPanel();openIntroModal(${r.id})"><i class="fa-solid fa-rotate-left"></i> Resend intro</button>`);
+  }
+  if (r.status === "Ambassador Confirmed")
+    btns.push(`<button class="btn btn-primary btn-sm" onclick="closeDetailPanel();advanceStatus(${r.id})"><i class="fa-solid fa-check"></i> Mark chat completed</button>`);
+  if (r.status === "Chat Completed")
+    btns.push(`<button class="btn btn-primary btn-sm" onclick="closeDetailPanel();openFeedbackModal(${r.id})"><i class="fa-regular fa-envelope"></i> Send feedback form</button>`);
+  if (r.status === "Feedback Sent")
+    btns.push(`<button class="btn btn-primary btn-sm" onclick="closeDetailPanel();advanceStatus(${r.id})"><i class="fa-solid fa-check"></i> Mark feedback received</button>`);
+  if (isStalled(r))
+    btns.push(`<button class="btn btn-danger btn-sm" onclick="closeDetailPanel();sendNudge(${r.id})"><i class="fa-solid fa-bolt"></i> Nudge ambassador</button>`);
+  if (!btns.length) return '';
+  return `<div style="display:flex;flex-wrap:wrap;gap:8px">${btns.join('')}</div>`;
 }
 
 function renderDetailPanel() {
@@ -2000,7 +2084,10 @@ function renderDetailPanel() {
       </div>`).join('')
     : '<p style="font-size:12px;color:var(--muted)">No activity yet.</p>';
 
+  const dpActions = buildDetailActions(req, amb);
+
   document.getElementById('dp-body').innerHTML = `
+    ${dpActions ? `<div style="margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border)">${dpActions}</div>` : ''}
     <div class="detail-field">
       <div class="detail-field-label">Status</div>
       <span class="status ${STATUS_CLASSES[es]}">${es}</span>
@@ -2137,11 +2224,17 @@ function renderAmbGrid() {
       : '';
     const statsHtml = a.type === 'student'
       ? `<div class="amb-card-stats">
-          <div class="amb-stat"><span class="amb-stat-val">${activeCount}</span><span class="amb-stat-lbl">Active</span></div>
-          <div class="amb-stat"><span class="amb-stat-val">${completedCount}</span><span class="amb-stat-lbl">Completed</span></div>
+          <div class="amb-stat" onclick="filterByAmb(${a.id},'active')" style="cursor:pointer" title="View active requests">
+            <span class="amb-stat-val">${activeCount}</span><span class="amb-stat-lbl">Active</span>
+          </div>
+          <div class="amb-stat" onclick="filterByAmb(${a.id},'completed')" style="cursor:pointer" title="View completed requests">
+            <span class="amb-stat-val">${completedCount}</span><span class="amb-stat-lbl">Completed</span>
+          </div>
         </div>`
       : `<div class="amb-card-stats">
-          <div class="amb-stat"><span class="amb-stat-val">${completedCount}</span><span class="amb-stat-lbl">Chats completed</span></div>
+          <div class="amb-stat" onclick="filterByAmb(${a.id},'completed')" style="cursor:pointer" title="View completed requests">
+            <span class="amb-stat-val">${completedCount}</span><span class="amb-stat-lbl">Chats completed</span>
+          </div>
         </div>`;
     return `<div class="amb-card">
       <div class="amb-card-header">
