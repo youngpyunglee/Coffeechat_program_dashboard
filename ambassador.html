@@ -633,6 +633,157 @@
       align-items: center;
       gap: 8px;
     }
+
+    /* ── Faculty Connect Drawer ── */
+    .fc-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.45);
+      z-index: 300; display: none;
+    }
+    .fc-overlay.open { display: block; }
+    .fc-drawer {
+      position: fixed; top: 0; right: 0;
+      width: 430px; height: 100vh;
+      background: var(--surface);
+      box-shadow: -4px 0 32px rgba(0,0,0,.18);
+      display: flex; flex-direction: column;
+      transform: translateX(100%);
+      transition: transform .25s ease;
+      z-index: 301;
+    }
+    .fc-overlay.open .fc-drawer { transform: translateX(0); }
+    .fc-head {
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .fc-head h3 { font-size: 15px; font-weight: 700; }
+    .fc-body { flex: 1; overflow-y: auto; padding: 20px 22px; display: flex; flex-direction: column; gap: 18px; }
+    .fc-foot { padding: 14px 22px; border-top: 1px solid var(--border); display: flex; gap: 10px; flex-shrink: 0; }
+    .fc-fl {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .7px; color: var(--muted); margin-bottom: 8px;
+    }
+    .fc-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .fc-chip {
+      font-size: 12px; padding: 5px 11px; border-radius: 99px;
+      border: 1.5px solid var(--border); color: var(--muted);
+      cursor: pointer; background: white; font-family: inherit; font-weight: 500;
+      transition: all .15s;
+    }
+    .fc-chip:hover { border-color: var(--purple); color: var(--purple); }
+    .fc-chip.sel { background: #f0ebff; border-color: var(--purple); color: var(--purple); }
+    .fc-chip.other-chip { border-style: dashed; }
+    .fc-input {
+      width: 100%; border: 1.5px solid var(--border); border-radius: 8px;
+      padding: 8px 12px; font-size: 13px; font-family: inherit; outline: none;
+      transition: border-color .15s; background: white; color: var(--text);
+    }
+    .fc-input:focus { border-color: var(--purple); }
+    .fc-input::placeholder { color: var(--muted); }
+    .fc-custom-inputs { display: none; flex-direction: column; gap: 8px; margin-top: 8px; }
+
+    /* Custom faculty dropdown */
+    .fac-dd { position: relative; }
+    .fac-trigger {
+      display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+      background: white; border: 1.5px solid var(--border); border-radius: 10px;
+      cursor: pointer; user-select: none; transition: border-color .15s;
+    }
+    .fac-trigger:hover { border-color: var(--purple); }
+    .fac-trigger.open { border-color: var(--purple); border-radius: 10px 10px 0 0; border-bottom-color: transparent; }
+    .fac-tav {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: #f0ebff; color: var(--purple);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; flex-shrink: 0;
+    }
+    .fac-tinfo { flex: 1; min-width: 0; }
+    .fac-tname { font-size: 13px; font-weight: 600; color: var(--text); }
+    .fac-trole { font-size: 11px; color: var(--muted); margin-top: 1px; }
+    .fac-tph { font-size: 13px; color: var(--muted); flex: 1; }
+    .fac-rec { font-size: 10px; padding: 2px 8px; border-radius: 99px; background: #dcfce7; color: #15803d; font-weight: 700; flex-shrink: 0; }
+    .fac-chev { font-size: 14px; color: var(--muted); flex-shrink: 0; transition: transform .2s; }
+    .fac-trigger.open .fac-chev { transform: rotate(180deg); }
+    .fac-menu { border: 1.5px solid var(--purple); border-top: none; border-radius: 0 0 10px 10px; background: white; display: none; }
+    .fac-menu.open { display: block; }
+    .fac-glbl {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .6px; color: var(--muted); padding: 7px 14px 4px;
+      border-top: 1px solid var(--border);
+    }
+    .fac-glbl:first-child { border-top: none; }
+    .fac-option { display: flex; align-items: center; gap: 10px; padding: 9px 14px; cursor: pointer; transition: background .12s; }
+    .fac-option:hover { background: #fafafa; }
+    .fac-option.selected { background: #f0ebff; }
+    .fac-option.selected .fac-on { color: var(--purple); }
+    .fac-oav {
+      width: 30px; height: 30px; border-radius: 50%;
+      background: #f0ebff; color: var(--purple);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 700; flex-shrink: 0;
+    }
+    .fac-on { font-size: 12px; font-weight: 600; color: var(--text); }
+    .fac-or { font-size: 11px; color: var(--muted); margin-top: 1px; }
+    .fac-ocustom {
+      display: flex; align-items: center; gap: 8px; padding: 9px 14px;
+      cursor: pointer; font-size: 12px; font-weight: 600; color: var(--purple);
+      border-top: 1px solid var(--border); transition: background .12s;
+    }
+    .fac-ocustom:hover { background: #fafafa; }
+    .fac-manage-row {
+      padding: 7px 14px; border-top: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: flex-end;
+    }
+    .fac-manage-row button {
+      font-size: 11px; color: var(--muted); background: none; border: none;
+      cursor: pointer; font-family: inherit; font-weight: 600;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .fac-manage-row button:hover { color: var(--purple); }
+
+    .fc-email-box {
+      background: #f9f8ff; border: 1px solid #e0d9f5;
+      border-radius: 8px; padding: 16px 18px;
+      font-size: 13px; line-height: 1.7;
+      position: relative; display: none;
+    }
+    .fc-email-box.show { display: block; }
+    .fc-email-meta {
+      font-size: 11px; color: var(--muted);
+      margin-bottom: 10px; padding-bottom: 10px;
+      border-bottom: 1px solid #e0d9f5; line-height: 1.9;
+    }
+    .fc-email-meta strong { color: var(--text); }
+    .fc-copy-btn {
+      position: absolute; top: 12px; right: 14px;
+      font-size: 11px; padding: 3px 10px; border-radius: 99px;
+      border: 1px solid var(--border); background: white; color: var(--muted);
+      cursor: pointer; font-family: inherit;
+    }
+    .fc-copy-btn:hover { color: var(--text); }
+    .fc-hint { font-size: 12px; color: var(--muted); text-align: center; padding: 4px 0; }
+
+    /* ── Manage Faculty Modal ── */
+    .mf-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.55); z-index: 400; display: none; align-items: center; justify-content: center; }
+    .mf-backdrop.open { display: flex; }
+    .mf-modal { background: white; border-radius: 12px; width: 540px; max-width: 96vw; max-height: 88vh; display: flex; flex-direction: column; box-shadow: 0 20px 60px rgba(0,0,0,.25); }
+    .mf-head { padding: 18px 22px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+    .mf-head h3 { font-size: 15px; font-weight: 700; }
+    .mf-body { flex: 1; overflow-y: auto; padding: 0 22px 16px; }
+    .mf-foot { padding: 14px 22px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px; flex-shrink: 0; }
+    .mf-row { display: flex; align-items: center; gap: 10px; padding: 11px 0; border-bottom: 1px solid var(--border); }
+    .mf-row:last-child { border-bottom: none; }
+    .mf-av { width: 32px; height: 32px; border-radius: 50%; background: #f0ebff; color: var(--purple); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; flex-shrink: 0; }
+    .mf-info { flex: 1; min-width: 0; }
+    .mf-name { font-size: 13px; font-weight: 600; }
+    .mf-role-email { font-size: 11px; color: var(--muted); margin-top: 1px; }
+    .mf-del { background: none; border: none; cursor: pointer; color: var(--danger); font-size: 13px; padding: 4px 8px; border-radius: 4px; font-family: inherit; }
+    .mf-del:hover { background: #fef2f2; }
+    .mf-add { background: #fafafa; border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin: 14px 0 0; }
+    .mf-add h4 { font-size: 12px; font-weight: 700; margin-bottom: 10px; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); }
+    .mf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
   </style>
 </head>
 <body>
@@ -783,6 +934,102 @@
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeDoneModal()">Cancel</button>
       <button class="btn btn-success" id="done-confirm-btn">✓ Submit &amp; Mark Complete</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Faculty Connect Drawer ── -->
+<div class="fc-overlay" id="fc-overlay" onclick="fcOverlayClick(event)">
+  <div class="fc-drawer" id="fc-drawer">
+    <div class="fc-head">
+      <h3><i class="fa-solid fa-users" style="color:var(--purple);margin-right:8px"></i>Connect student with faculty</h3>
+      <button class="btn btn-outline btn-sm" onclick="closeConnectDrawer()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="fc-body">
+      <!-- Student info -->
+      <div>
+        <div class="fc-fl">Student</div>
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:#fafafa;border:1px solid var(--border);border-radius:8px">
+          <div class="fac-tav" id="fc-student-av"></div>
+          <div><div style="font-size:13px;font-weight:700" id="fc-student-name"></div><div style="font-size:11px;color:var(--muted)" id="fc-student-email"></div></div>
+        </div>
+      </div>
+
+      <!-- Interest chips -->
+      <div>
+        <div class="fc-fl">What were they most interested in?</div>
+        <div class="fc-chips" id="fc-chips">
+          <button class="fc-chip" data-topic="Academics &amp; Curriculum" onclick="fcPickTopic(this)">Academics &amp; Curriculum</button>
+          <button class="fc-chip" data-topic="Research Opportunities" onclick="fcPickTopic(this)">Research Opportunities</button>
+          <button class="fc-chip" data-topic="Financial Aid / Scholarships" onclick="fcPickTopic(this)">Financial Aid &amp; Scholarships</button>
+          <button class="fc-chip" data-topic="Career Paths" onclick="fcPickTopic(this)">Career Paths</button>
+          <button class="fc-chip" data-topic="Admissions Process" onclick="fcPickTopic(this)">Admissions Process</button>
+          <button class="fc-chip" data-topic="Campus Life" onclick="fcPickTopic(this)">Campus Life</button>
+          <button class="fc-chip other-chip" data-topic="__other" onclick="fcPickTopic(this)"><i class="fa-solid fa-plus" style="font-size:10px"></i> Other</button>
+        </div>
+        <div id="fc-other-wrap" style="display:none;margin-top:8px">
+          <input type="text" class="fc-input" id="fc-other-input" placeholder="Describe their interest, e.g. student visa process…" oninput="fcOtherInput()"/>
+        </div>
+        <div style="margin-top:8px">
+          <textarea class="fc-input" id="fc-notes" rows="2" style="resize:vertical" placeholder="Optional: add notes from the conversation to personalise the email…" oninput="fcRefreshEmail()"></textarea>
+        </div>
+      </div>
+
+      <!-- Faculty dropdown -->
+      <div>
+        <div class="fc-fl">Faculty member</div>
+        <div class="fac-dd" id="fac-dd">
+          <div class="fac-trigger" id="fac-trigger" onclick="fcToggleMenu()">
+            <span class="fac-tph" id="fac-tph">Select a faculty member…</span>
+            <i class="fa-solid fa-chevron-down fac-chev" id="fac-chev"></i>
+          </div>
+          <div class="fac-menu" id="fac-menu"></div>
+        </div>
+        <div class="fc-custom-inputs" id="fc-custom-inputs">
+          <input type="text" class="fc-input" id="fc-cfac-name" placeholder="Full name, e.g. Dr. Emily Watson" oninput="fcCustomFacInput()"/>
+          <input type="text" class="fc-input" id="fc-cfac-email" placeholder="Email, e.g. ewatson@uw.edu" oninput="fcCustomFacInput()"/>
+        </div>
+      </div>
+
+      <!-- Email preview -->
+      <div>
+        <div class="fc-fl">Email preview</div>
+        <div class="fc-email-box" id="fc-email-box">
+          <button class="fc-copy-btn" id="fc-copy-btn" onclick="fcCopyEmail()">Copy</button>
+          <div class="fc-email-meta" id="fc-email-meta"></div>
+          <div id="fc-email-body"></div>
+        </div>
+        <div class="fc-hint" id="fc-hint">Select an interest area and faculty member above</div>
+      </div>
+    </div>
+    <div class="fc-foot">
+      <button class="btn btn-outline" onclick="closeConnectDrawer()">Cancel</button>
+      <button class="btn btn-primary" id="fc-send-btn" disabled onclick="fcSendEmail()"><i class="fa-regular fa-envelope"></i> Send introduction email</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Manage Faculty Modal ── -->
+<div class="mf-backdrop" id="mf-backdrop" onclick="mfBackdropClick(event)">
+  <div class="mf-modal">
+    <div class="mf-head">
+      <h3>Manage Faculty List</h3>
+      <button class="btn btn-outline btn-sm" onclick="closeManageFaculty()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="mf-body">
+      <div id="mf-list" style="margin-top:8px"></div>
+      <div class="mf-add">
+        <h4>Add a new faculty member</h4>
+        <div class="mf-grid">
+          <input type="text" class="fc-input" id="mf-new-name" placeholder="Full name"/>
+          <input type="text" class="fc-input" id="mf-new-email" placeholder="Email"/>
+        </div>
+        <input type="text" class="fc-input" id="mf-new-role" placeholder="Role / area (e.g. Academic Director, MS in Technology Innovation)" style="margin-bottom:8px"/>
+        <button class="btn btn-primary btn-sm" onclick="mfAddFaculty()"><i class="fa-solid fa-plus"></i> Add faculty member</button>
+      </div>
+    </div>
+    <div class="mf-foot">
+      <button class="btn btn-outline" onclick="closeManageFaculty()">Close</button>
     </div>
   </div>
 </div>
@@ -1149,8 +1396,9 @@ function buildCard(r, amb) {
       actions += `<button class="btn btn-success btn-sm" onclick="openDoneModal(${r.id})"><i class="fa-solid fa-circle-check"></i> Mark Chat Done</button>`;
     }
   } else {
-    // Completed — just show a follow-up email option in case they need to respond
+    // Completed — follow-up + connect with faculty
     actions += `<button class="btn btn-outline btn-sm" onclick="openEmailModal(${r.id}, 'followup')"><i class="fa-regular fa-envelope"></i> Send Follow-up</button>`;
+    actions += `<button class="btn btn-primary btn-sm" onclick="openConnectDrawer(${r.id})"><i class="fa-solid fa-users"></i> Connect with Faculty</button>`;
   }
 
   const logs = [...(r.activityLog || [])].reverse();
@@ -1371,6 +1619,335 @@ function toggleTimeline(reqId, btn) {
   btn.innerHTML = isOpen
     ? `<i class="fa-solid fa-clock-rotate-left" style="font-size:11px"></i> Activity (${requests.find(r=>r.id===reqId).activityLog.length})`
     : `<i class="fa-solid fa-chevron-up" style="font-size:11px"></i> Hide activity`;
+}
+
+// ─────────────────────────────────────────
+// Faculty Connect — data & state
+// ─────────────────────────────────────────
+
+const DEFAULT_FACULTY = [
+  { id:1, name:"Kevin Arne",      role:"Associate Director, Prototyping Lab; Lecturer, HCDE", email:"karne@uw.edu" },
+  { id:2, name:"Zubin Assadian",  role:"Connected Devices Specialist",                         email:"zassad@uw.edu" },
+  { id:3, name:"Kyle Brown",      role:"Assistant Director, Graduate Admissions & Global Programs", email:"brownkt@uw.edu" },
+  { id:4, name:"Katelin Cannon",  role:"Director of Partnerships & Engagement Programs",       email:"kacannon@uw.edu" },
+  { id:5, name:"Sean Carr",       role:"Executive Director and CEO; Affiliate Associate Professor", email:"sdcarr@uw.edu" },
+  { id:6, name:"Patrick Chidsey", role:"Assistant Director, Career Services & Industry Engagement", email:"chidsey@uw.edu" },
+  { id:7, name:"Taryn Echert",    role:"Assistant Director of Engagement",                     email:"echert@uw.edu" },
+  { id:8, name:"Jason Evans",     role:"Academic Services Coordinator",                        email:"jevans15@uw.edu" },
+  { id:9, name:"Kara Fichthorn",  role:"Academic Director, MS in Technology Innovation",       email:"karafich@uw.edu" },
+  { id:10,name:"Jack Hatcher",    role:"Assistant Lab Manager; UW MSTI 2024",                  email:"jhat@uw.edu" },
+];
+
+// Topic → faculty id order (first = recommended)
+const TOPIC_FAC = {
+  "Academics & Curriculum":      [9, 8, 1],
+  "Research Opportunities":      [1, 2, 9],
+  "Financial Aid / Scholarships":[3, 9],
+  "Career Paths":                [6, 4, 5],
+  "Admissions Process":          [3, 8],
+  "Campus Life":                 [7, 10, 4],
+};
+
+function loadFaculty() {
+  try { return JSON.parse(localStorage.getItem("msti_faculty")) || DEFAULT_FACULTY; }
+  catch(e) { return DEFAULT_FACULTY; }
+}
+function saveFacultyData(list) {
+  localStorage.setItem("msti_faculty", JSON.stringify(list));
+}
+function getFacultyList() { return loadFaculty(); }
+function facInitials(name) { return name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase(); }
+
+let fcReqId = null, fcTopic = null, fcSelFac = null, fcCustomMode = false, fcMenuOpen = false;
+
+// ─────────────────────────────────────────
+// Open / close drawer
+// ─────────────────────────────────────────
+
+function openConnectDrawer(reqId) {
+  const r = requests.find(x => x.id === reqId);
+  const amb = AMBASSADORS.find(a => a.id === currentAmbId);
+  if (!r || !amb) return;
+  fcReqId = reqId; fcTopic = null; fcSelFac = null; fcCustomMode = false; fcMenuOpen = false;
+
+  document.getElementById('fc-student-av').textContent = initials(r.studentName);
+  document.getElementById('fc-student-name').textContent = r.studentName;
+  document.getElementById('fc-student-email').textContent = r.studentEmail;
+
+  document.querySelectorAll('.fc-chip').forEach(c => c.classList.remove('sel'));
+  document.getElementById('fc-other-wrap').style.display = 'none';
+  document.getElementById('fc-other-input').value = '';
+  document.getElementById('fc-notes').value = '';
+  document.getElementById('fc-custom-inputs').style.display = 'none';
+  document.getElementById('fc-cfac-name').value = '';
+  document.getElementById('fc-cfac-email').value = '';
+  document.getElementById('fac-menu').classList.remove('open');
+  document.getElementById('fac-trigger').classList.remove('open');
+  document.getElementById('fc-email-box').classList.remove('show');
+  document.getElementById('fc-hint').style.display = '';
+  document.getElementById('fc-send-btn').disabled = true;
+  fcSetTriggerEmpty();
+  fcBuildMenu(null);
+
+  // Auto-select chip based on feedback interest
+  const feedbackInterest = r.feedback && r.feedback.interest;
+  const topicMatch = feedbackInterest && TOPIC_FAC[feedbackInterest] ? feedbackInterest : null;
+  if (topicMatch) {
+    setTimeout(() => {
+      const chip = [...document.querySelectorAll('.fc-chip')].find(c => c.dataset.topic === topicMatch);
+      if (chip) fcPickTopic(chip);
+    }, 300);
+  }
+
+  document.getElementById('fc-overlay').classList.add('open');
+}
+
+function closeConnectDrawer() {
+  document.getElementById('fc-overlay').classList.remove('open');
+  fcMenuOpen = false;
+}
+
+function fcOverlayClick(e) {
+  if (e.target === document.getElementById('fc-overlay')) closeConnectDrawer();
+}
+
+// ─────────────────────────────────────────
+// Topic chips
+// ─────────────────────────────────────────
+
+function fcPickTopic(el) {
+  document.querySelectorAll('.fc-chip').forEach(c => c.classList.remove('sel'));
+  el.classList.add('sel');
+  const t = el.dataset.topic;
+  if (t === '__other') {
+    fcTopic = null;
+    document.getElementById('fc-other-wrap').style.display = 'block';
+    document.getElementById('fc-other-input').focus();
+    fcBuildMenu(null);
+  } else {
+    fcTopic = t;
+    document.getElementById('fc-other-wrap').style.display = 'none';
+    fcBuildMenu(t);
+  }
+}
+
+function fcOtherInput() {
+  fcTopic = document.getElementById('fc-other-input').value.trim() || null;
+  fcRefreshEmail();
+}
+
+// ─────────────────────────────────────────
+// Faculty dropdown
+// ─────────────────────────────────────────
+
+function fcBuildMenu(topic) {
+  const allFac = getFacultyList();
+  const recIds = topic && TOPIC_FAC[topic] ? TOPIC_FAC[topic] : [];
+  const recFac = recIds.map(id => allFac.find(f => f.id === id)).filter(Boolean);
+  const otherFac = allFac.filter(f => !recIds.includes(f.id));
+  const menu = document.getElementById('fac-menu');
+  menu.innerHTML = '';
+  fcSelFac = null; fcCustomMode = false;
+  fcSetTriggerEmpty();
+  document.getElementById('fc-custom-inputs').style.display = 'none';
+
+  if (recFac.length) {
+    menu.appendChild(fcGroupLabel('Recommended'));
+    recFac.forEach((f, i) => menu.appendChild(fcMakeOption(f, i === 0)));
+  }
+  menu.appendChild(fcGroupLabel(recFac.length ? 'All faculty' : 'Faculty'));
+  otherFac.forEach(f => menu.appendChild(fcMakeOption(f, false)));
+
+  // Custom entry option
+  const custom = document.createElement('div');
+  custom.className = 'fac-ocustom';
+  custom.innerHTML = '<i class="fa-solid fa-plus"></i> Enter a different faculty member…';
+  custom.onclick = fcSelectCustom;
+  menu.appendChild(custom);
+
+  // Manage link
+  const mrow = document.createElement('div');
+  mrow.className = 'fac-manage-row';
+  mrow.innerHTML = '<button onclick="openManageFaculty()"><i class="fa-solid fa-gear" style="font-size:11px"></i> Manage faculty list</button>';
+  menu.appendChild(mrow);
+
+  // Auto-select first recommended
+  if (recFac.length) {
+    setTimeout(() => {
+      const firstOpt = menu.querySelector('.fac-option');
+      if (firstOpt) fcSelectOption(firstOpt, recFac[0], true);
+    }, 30);
+  }
+}
+
+function fcGroupLabel(text) {
+  const el = document.createElement('div');
+  el.className = 'fac-glbl';
+  el.textContent = text;
+  return el;
+}
+
+function fcMakeOption(f, isRec) {
+  const el = document.createElement('div');
+  el.className = 'fac-option';
+  el.innerHTML = `<div class="fac-oav">${facInitials(f.name)}</div><div><div class="fac-on">${f.name}</div><div class="fac-or">${f.role}</div></div>${isRec ? '<span class="fac-rec">Recommended</span>' : ''}`;
+  el.onclick = () => { fcSelectOption(el, f, isRec); fcCloseMenu(); };
+  return el;
+}
+
+function fcSelectOption(el, f, isRec) {
+  document.querySelectorAll('.fac-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  fcSelFac = f; fcCustomMode = false;
+  document.getElementById('fc-custom-inputs').style.display = 'none';
+  // Update trigger
+  const trigger = document.getElementById('fac-trigger');
+  trigger.innerHTML = `<div class="fac-tav">${facInitials(f.name)}</div><div class="fac-tinfo"><div class="fac-tname">${f.name}</div><div class="fac-trole">${f.role}</div></div>${isRec ? '<span class="fac-rec">Recommended</span>' : ''}<i class="fa-solid fa-chevron-down fac-chev" id="fac-chev"></i>`;
+  fcRefreshEmail();
+}
+
+function fcSelectCustom() {
+  document.querySelectorAll('.fac-option').forEach(o => o.classList.remove('selected'));
+  fcSelFac = null; fcCustomMode = true;
+  fcCloseMenu();
+  document.getElementById('fc-custom-inputs').style.display = 'flex';
+  document.getElementById('fc-cfac-name').focus();
+  const trigger = document.getElementById('fac-trigger');
+  trigger.innerHTML = `<div class="fac-tav" style="background:#f3f4f6;color:var(--muted)"><i class="fa-solid fa-user"></i></div><div class="fac-tinfo"><div class="fac-tname" style="color:var(--muted)">Custom faculty member</div><div class="fac-trole">Fill in name and email below</div></div><i class="fa-solid fa-chevron-down fac-chev" id="fac-chev"></i>`;
+  fcRefreshEmail();
+}
+
+function fcSetTriggerEmpty() {
+  document.getElementById('fac-trigger').innerHTML = `<span class="fac-tph">Select a faculty member…</span><i class="fa-solid fa-chevron-down fac-chev" id="fac-chev"></i>`;
+}
+
+function fcToggleMenu() { fcMenuOpen ? fcCloseMenu() : fcOpenMenu(); }
+function fcOpenMenu() {
+  const menu = document.getElementById('fac-menu');
+  if (!menu.children.length) return;
+  menu.classList.add('open');
+  document.getElementById('fac-trigger').classList.add('open');
+  fcMenuOpen = true;
+}
+function fcCloseMenu() {
+  document.getElementById('fac-menu').classList.remove('open');
+  document.getElementById('fac-trigger').classList.remove('open');
+  fcMenuOpen = false;
+}
+
+function fcCustomFacInput() { fcRefreshEmail(); }
+
+// ─────────────────────────────────────────
+// Email preview
+// ─────────────────────────────────────────
+
+function fcGetActiveFac() {
+  if (fcCustomMode) {
+    const n = document.getElementById('fc-cfac-name').value.trim();
+    const e = document.getElementById('fc-cfac-email').value.trim();
+    return n ? { name: n, email: e, role: '' } : null;
+  }
+  return fcSelFac;
+}
+
+function fcRefreshEmail() {
+  const fac = fcGetActiveFac();
+  const topic = fcTopic || document.getElementById('fc-other-input').value.trim();
+  const box = document.getElementById('fc-email-box');
+  const hint = document.getElementById('fc-hint');
+  const btn = document.getElementById('fc-send-btn');
+  if (!fac || !topic) { box.classList.remove('show'); hint.style.display = ''; btn.disabled = true; return; }
+  hint.style.display = 'none'; box.classList.add('show'); btn.disabled = false;
+
+  const r = requests.find(x => x.id === fcReqId);
+  const amb = AMBASSADORS.find(a => a.id === currentAmbId);
+  const sEmail = r.studentEmail;
+  const fEmail = fac.email || '';
+  const notes = document.getElementById('fc-notes').value.trim();
+  const notesBit = notes ? ` They also mentioned: <em>${notes}</em>.` : '';
+  const facLast = fac.name.split(' ').slice(-1)[0];
+  const stuFirst = r.studentName.split(' ')[0];
+
+  document.getElementById('fc-email-meta').innerHTML =
+    `<strong>To:</strong> ${fac.name}${fEmail ? ' &lt;' + fEmail + '&gt;' : ''}<br><strong>CC:</strong> ${r.studentName} &lt;${sEmail}&gt;`;
+  document.getElementById('fc-email-body').innerHTML =
+    `<p>Hi ${facLast},</p>
+     <p>I wanted to connect you with <strong>${r.studentName}</strong>, a prospective MSTI student I had a great coffee chat with recently. During our conversation, ${stuFirst} expressed strong interest in <em>${topic.toLowerCase()}</em>.${notesBit} I thought you would be the ideal person to speak with them further.</p>
+     <p>I've cc'd ${stuFirst} on this email — please feel free to reach out directly to set up a time.</p>
+     <p>Best,<br>${amb.name}<br><span style="color:var(--muted)">GIX MSTI Ambassador</span></p>`;
+}
+
+function fcCopyEmail() {
+  const text = document.getElementById('fc-email-body').innerText;
+  navigator.clipboard.writeText(text).catch(() => {});
+  const btn = document.getElementById('fc-copy-btn');
+  btn.textContent = 'Copied!';
+  setTimeout(() => btn.textContent = 'Copy', 1800);
+}
+
+function fcSendEmail() {
+  const r = requests.find(x => x.id === fcReqId);
+  const fac = fcGetActiveFac();
+  if (!r || !fac) return;
+  r.activityLog.push({ date: today(), action: `Faculty connection email sent to ${fac.name}`, type: 'status' });
+  closeConnectDrawer();
+  toast(`✓ Introduction email sent to ${fac.name}`, 'success');
+  renderDashboard();
+}
+
+// ─────────────────────────────────────────
+// Manage Faculty Modal
+// ─────────────────────────────────────────
+
+function openManageFaculty() {
+  fcCloseMenu();
+  renderMFList();
+  document.getElementById('mf-backdrop').classList.add('open');
+}
+function closeManageFaculty() {
+  document.getElementById('mf-backdrop').classList.remove('open');
+  // Rebuild menu with updated list
+  fcBuildMenu(fcTopic);
+}
+function mfBackdropClick(e) {
+  if (e.target === document.getElementById('mf-backdrop')) closeManageFaculty();
+}
+
+function renderMFList() {
+  const list = getFacultyList();
+  const container = document.getElementById('mf-list');
+  container.innerHTML = list.map(f => `
+    <div class="mf-row">
+      <div class="mf-av">${facInitials(f.name)}</div>
+      <div class="mf-info">
+        <div class="mf-name">${f.name}</div>
+        <div class="mf-role-email">${f.role} · ${f.email}</div>
+      </div>
+      <button class="mf-del" onclick="mfRemoveFaculty(${f.id})" title="Remove"><i class="fa-solid fa-trash"></i></button>
+    </div>
+  `).join('');
+}
+
+function mfRemoveFaculty(id) {
+  const list = getFacultyList().filter(f => f.id !== id);
+  saveFacultyData(list);
+  renderMFList();
+}
+
+function mfAddFaculty() {
+  const name = document.getElementById('mf-new-name').value.trim();
+  const email = document.getElementById('mf-new-email').value.trim();
+  const role = document.getElementById('mf-new-role').value.trim();
+  if (!name) { toast('Please enter a faculty name', 'warning'); return; }
+  const list = getFacultyList();
+  const newId = Math.max(0, ...list.map(f => f.id)) + 1;
+  list.push({ id: newId, name, role: role || 'Faculty', email: email || '' });
+  saveFacultyData(list);
+  document.getElementById('mf-new-name').value = '';
+  document.getElementById('mf-new-email').value = '';
+  document.getElementById('mf-new-role').value = '';
+  renderMFList();
+  toast(`✓ ${name} added to faculty list`, 'success');
 }
 
 // ─────────────────────────────────────────
