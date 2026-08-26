@@ -806,6 +806,11 @@
     .slot-time { width: 108px; }
     .slot-date:focus, .slot-time:focus { border-color: var(--purple); }
     .slot-tz { font-size: 11px; color: var(--muted); font-weight: 600; }
+    .slot-remove { background: none; border: none; cursor: pointer; color: var(--muted); padding: 2px 4px; border-radius: 4px; line-height: 1; font-size: 14px; transition: color .15s, background .15s; flex-shrink: 0; }
+    .slot-remove:hover { color: #c0392b; background: #fdecea; }
+    .add-slot-btn { margin-top: 8px; background: none; border: 1.5px dashed var(--border); border-radius: 8px; color: var(--purple); font-size: 12px; font-weight: 600; padding: 6px 14px; cursor: pointer; width: 100%; transition: border-color .15s, background .15s; }
+    .add-slot-btn:hover { border-color: var(--purple); background: #f5f0ff; }
+    .add-slot-btn:disabled { opacity: .4; cursor: not-allowed; }
     .email-reset-btn {
       font-size: 11px; color: var(--muted); background: none; border: none;
       cursor: pointer; font-family: inherit; padding: 0; margin-left: auto;
@@ -913,12 +918,9 @@
           </select>
         </div>
       </div>
-      <p style="font-size:12px;color:var(--muted);margin-bottom:10px">These will appear in your email. Edit any slot or change the times to match your schedule.</p>
-      <div class="slot-rows">
-        <div class="slot-row"><span class="slot-num">1</span><input type="date" class="slot-date" id="slot-date-0" onchange="updateEmailSlots()"><input type="time" class="slot-time" id="slot-time-0" onchange="updateEmailSlots()"></div>
-        <div class="slot-row"><span class="slot-num">2</span><input type="date" class="slot-date" id="slot-date-1" onchange="updateEmailSlots()"><input type="time" class="slot-time" id="slot-time-1" onchange="updateEmailSlots()"></div>
-        <div class="slot-row"><span class="slot-num">3</span><input type="date" class="slot-date" id="slot-date-2" onchange="updateEmailSlots()"><input type="time" class="slot-time" id="slot-time-2" onchange="updateEmailSlots()"></div>
-      </div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:10px">These will appear in your email. Add as many slots as you like, or remove ones that don't work.</p>
+      <div class="slot-rows" id="slot-rows"></div>
+      <button class="add-slot-btn" id="add-slot-btn" onclick="addSlot()"><i class="fa-solid fa-plus" style="font-size:10px"></i> Add time slot</button>
     </div>
 
     <!-- Editable email body -->
@@ -1612,8 +1614,75 @@ function fmtSlot(dateVal, timeVal) {
   const tz = getSelectedTz();
   return `${dayStr}, ${hr}:${m === 0 ? '00' : m} ${ampm} ${tz}`;
 }
+const MAX_SLOTS = 5;
+let slotCount = 0;
+
+function renderSlots() {
+  const container = document.getElementById('slot-rows');
+  if (!container) return;
+  // Preserve existing values
+  const saved = Array.from({ length: slotCount }, (_, i) => ({
+    date: document.getElementById(`slot-date-${i}`)?.value || '',
+    time: document.getElementById(`slot-time-${i}`)?.value || '',
+  }));
+  container.innerHTML = saved.map((s, i) => `
+    <div class="slot-row" id="slot-row-${i}">
+      <span class="slot-num">${i + 1}</span>
+      <input type="date" class="slot-date" id="slot-date-${i}" value="${s.date}" onchange="updateEmailSlots()">
+      <input type="time" class="slot-time" id="slot-time-${i}" value="${s.time}" onchange="updateEmailSlots()">
+      ${slotCount > 1 ? `<button class="slot-remove" onclick="removeSlot(${i})" title="Remove this slot">×</button>` : '<span style="width:22px;flex-shrink:0"></span>'}
+    </div>`).join('');
+  const addBtn = document.getElementById('add-slot-btn');
+  if (addBtn) addBtn.disabled = slotCount >= MAX_SLOTS;
+}
+
+function addSlot(dateVal, timeVal) {
+  if (slotCount >= MAX_SLOTS) return;
+  // Save current values before re-render
+  const saved = Array.from({ length: slotCount }, (_, i) => ({
+    date: document.getElementById(`slot-date-${i}`)?.value || '',
+    time: document.getElementById(`slot-time-${i}`)?.value || '',
+  }));
+  saved.push({ date: dateVal || '', time: timeVal || '' });
+  slotCount++;
+  // Inject saved values then render
+  const container = document.getElementById('slot-rows');
+  if (!container) return;
+  container.innerHTML = saved.map((s, i) => `
+    <div class="slot-row" id="slot-row-${i}">
+      <span class="slot-num">${i + 1}</span>
+      <input type="date" class="slot-date" id="slot-date-${i}" value="${s.date}" onchange="updateEmailSlots()">
+      <input type="time" class="slot-time" id="slot-time-${i}" value="${s.time}" onchange="updateEmailSlots()">
+      ${slotCount > 1 ? `<button class="slot-remove" onclick="removeSlot(${i})" title="Remove this slot">×</button>` : '<span style="width:22px;flex-shrink:0"></span>'}
+    </div>`).join('');
+  const addBtn = document.getElementById('add-slot-btn');
+  if (addBtn) addBtn.disabled = slotCount >= MAX_SLOTS;
+  updateEmailSlots();
+}
+
+function removeSlot(idx) {
+  if (slotCount <= 1) return;
+  const remaining = Array.from({ length: slotCount }, (_, i) => ({
+    date: document.getElementById(`slot-date-${i}`)?.value || '',
+    time: document.getElementById(`slot-time-${i}`)?.value || '',
+  })).filter((_, i) => i !== idx);
+  slotCount = remaining.length;
+  const container = document.getElementById('slot-rows');
+  if (!container) return;
+  container.innerHTML = remaining.map((s, i) => `
+    <div class="slot-row" id="slot-row-${i}">
+      <span class="slot-num">${i + 1}</span>
+      <input type="date" class="slot-date" id="slot-date-${i}" value="${s.date}" onchange="updateEmailSlots()">
+      <input type="time" class="slot-time" id="slot-time-${i}" value="${s.time}" onchange="updateEmailSlots()">
+      ${slotCount > 1 ? `<button class="slot-remove" onclick="removeSlot(${i})" title="Remove this slot">×</button>` : '<span style="width:22px;flex-shrink:0"></span>'}
+    </div>`).join('');
+  const addBtn = document.getElementById('add-slot-btn');
+  if (addBtn) addBtn.disabled = slotCount >= MAX_SLOTS;
+  updateEmailSlots();
+}
+
 function getSlotsLines() {
-  return [0, 1, 2].map(i => {
+  return Array.from({ length: slotCount }, (_, i) => {
     const d = document.getElementById(`slot-date-${i}`)?.value;
     const t = document.getElementById(`slot-time-${i}`)?.value;
     return fmtSlot(d, t);
@@ -1635,18 +1704,13 @@ function openEmailModal(reqId, type) {
   // Show/hide date slots section
   document.getElementById("email-slots-section").style.display = isFollowup ? "none" : "";
 
-  // Pre-populate date slots
+  // Initialize date slots
   if (!isFollowup) {
     document.getElementById('slot-tz-select').value = 'PT';
-    const defaults = [
-      { d: addDays(2), t: "10:00" },
-      { d: addDays(4), t: "14:00" },
-      { d: addDays(7), t: "11:00" },
-    ];
-    defaults.forEach((s, i) => {
-      document.getElementById(`slot-date-${i}`).value = isoDate(s.d);
-      document.getElementById(`slot-time-${i}`).value = s.t;
-    });
+    // Reset to 1 slot pre-filled with today+2
+    slotCount = 0;
+    document.getElementById('slot-rows').innerHTML = '';
+    addSlot(isoDate(addDays(2)), '10:00');
   }
 
   document.getElementById("email-preview-body").value = isFollowup
