@@ -1110,8 +1110,33 @@
   <div class="modal" id="modal-box">
     <h2 id="modal-title">Send Intro Email</h2>
     <p class="modal-sub" id="modal-sub"></p>
-    <p class="section-label">Email Preview</p>
-    <div class="email-preview" id="email-preview"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+      <p class="section-label" style="margin:0">Email Content</p>
+      <button class="btn btn-outline btn-sm" onclick="resetCoordEmail()" style="font-size:11px"><i class="fa-solid fa-rotate-left" style="font-size:10px"></i> Reset</button>
+    </div>
+    <div style="background:#f9f8ff;border:1px solid #e0d9f5;border-radius:6px;display:flex;flex-direction:column;">
+      <textarea id="email-preview" style="width:100%;border:none;border-radius:6px 6px 0 0;padding:16px 18px;font-size:13px;font-family:Arial,sans-serif;line-height:1.7;resize:vertical;min-height:200px;max-height:300px;outline:none;background:transparent;color:#1a1a2e"></textarea>
+      <div style="padding:0 18px 18px 18px">
+        <hr class="sig-divider">
+        <div class="sig-block">
+          Master of Science in Technology Innovation<br>
+          Global Innovation Exchange (GIX)<br>
+          University of Washington<br>
+          <span class="sig-links">
+            <a href="mailto:joinmsti@uw.edu">joinmsti@uw.edu</a> |
+            <a href="https://gix.uw.edu" target="_blank">GIX</a> |
+            <a href="https://www.linkedin.com/school/gix-global-innovation-exchange/" target="_blank">LinkedIn</a>
+          </span><br>
+          <img src="images/email_image.png" alt="Global Innovation Exchange — University of Washington" class="sig-logo">
+          <div class="sig-social">
+            <a href="#" class="social-icon"><i class="fa-brands fa-facebook-f"></i></a>
+            <a href="#" class="social-icon"><i class="fa-brands fa-instagram"></i></a>
+            <a href="#" class="social-icon"><i class="fa-brands fa-x-twitter"></i></a>
+            <a href="#" class="social-icon"><i class="fa-brands fa-linkedin-in"></i></a>
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
       <button class="btn btn-primary" id="modal-confirm-btn">Send Email</button>
@@ -1786,33 +1811,24 @@ function openFeedbackModal(reqId) {
 
   document.getElementById("modal-title").textContent = "Send Feedback Form";
   document.getElementById("modal-sub").textContent = `To: ${req.studentEmail}`;
-  document.getElementById("email-preview").innerHTML = `
-    <p><strong>Subject: How was your MSTI Coffee Chat? We'd love your feedback!</strong></p>
-    <p>Hi ${studentFirst},</p>
-    <p>Thank you for connecting with <strong>${amb.name}</strong> as part of the MSTI Coffee Chat Program! We hope the conversation gave you a better sense of the program and what to expect.</p>
-    <p>We'd love to hear about your experience. Your feedback helps us improve the program for future prospective students. It only takes 2–3 minutes.</p>
-    <p><a href="#" style="display:inline-block;background:#4b2e83;color:white;padding:10px 20px;border-radius:8px;text-decoration:none;font-weight:600">Share your feedback →</a></p>
-    <p>Thank you, and we hope to see you in the MSTI program!</p>
-    <p>Best,<br>MSTI Admissions Ambassadors</p>
-    <hr class="sig-divider">
-    <div class="sig-block">
-      Master of Science in Technology Innovation<br>
-      Global Innovation Exchange (GIX)<br>
-      University of Washington<br>
-      <span class="sig-links">
-        <a href="mailto:joinmsti@uw.edu">joinmsti@uw.edu</a> |
-        <a href="https://gix.uw.edu" target="_blank">GIX</a> |
-        <a href="https://www.linkedin.com/school/gix-global-innovation-exchange/" target="_blank">LinkedIn</a>
-      </span><br>
-      <img src="images/email_image.png" alt="Global Innovation Exchange — University of Washington" class="sig-logo">
-      <div class="sig-social">
-        <a href="#" class="social-icon"><i class="fa-brands fa-facebook-f"></i></a>
-        <a href="#" class="social-icon"><i class="fa-brands fa-instagram"></i></a>
-        <a href="#" class="social-icon"><i class="fa-brands fa-x-twitter"></i></a>
-        <a href="#" class="social-icon"><i class="fa-brands fa-linkedin-in"></i></a>
-      </div>
-    </div>
-  `;
+
+  const body = `Subject: How was your MSTI Coffee Chat? We'd love your feedback!
+
+Hi ${studentFirst},
+
+Thank you for connecting with ${amb.name} as part of the MSTI Coffee Chat Program! We hope the conversation gave you a better sense of the program and what to expect.
+
+We'd love to hear about your experience. Your feedback helps us improve the program for future prospective students — it only takes 2–3 minutes.
+
+[ Share your feedback → ]
+
+Thank you, and we hope to see you in the MSTI program!
+
+Best,
+MSTI Admissions Ambassadors`;
+
+  document.getElementById("email-preview").value = body;
+  document.getElementById("email-preview").dataset.template = body;
   document.getElementById("modal-confirm-btn").textContent = "Send Email";
   document.getElementById("modal-confirm-btn").onclick = () => confirmSendFeedback(reqId);
   document.getElementById("modal-backdrop").style.display = "flex";
@@ -1901,7 +1917,9 @@ function openIntroModal(reqId) {
   document.getElementById("modal-sub").textContent =
     `To: ${req.studentEmail} & ${amb.email}`;
 
-  document.getElementById("email-preview").innerHTML = buildIntroEmail(req, amb);
+  const body = buildIntroEmail(req, amb);
+  document.getElementById("email-preview").value = body;
+  document.getElementById("email-preview").dataset.template = body;
 
   document.getElementById("modal-confirm-btn").textContent = "Send Email";
   document.getElementById("modal-confirm-btn").onclick = () => confirmSendIntro(reqId);
@@ -1916,45 +1934,30 @@ function buildIntroEmail(req, amb) {
     ? 'an MSTI alumni happy to share insights and support future students'
     : 'an MSTI student ambassador happy to share insights and support future students';
 
-  return `
-    <p><strong>Subject: Prospective Student Connecting with MSTI Students and Alumni</strong></p>
-    <p>Dear ${studentFirst} and ${ambFirst},</p>
-    <p>Thank you both for your interest in connecting with the MSTI network. Let me introduce you to each other!</p>
-    <ul>
-      <li>Meet <strong>${studentFirst}</strong>: a prospective MSTI student eager to learn more about the program and alumni experiences.
-        <ul>
-          <li>Email: <a href="mailto:${req.studentEmail}">${req.studentEmail}</a></li>
-        </ul>
-      </li>
-      <li>Meet <strong>${amb.name}</strong>: ${ambRole}.
-        <ul>
-          <li>Email: <a href="mailto:${amb.email}">${amb.email}</a></li>
-          <li>LinkedIn: <a href="https://${amb.linkedin}" target="_blank">https://${amb.linkedin}</a></li>
-        </ul>
-      </li>
-    </ul>
-    <p>You're welcome to connect directly via email to arrange a call, virtual meeting, or even an in-person visit based on your preferences. Hope this leads to a meaningful and engaging conversation.</p>
-    <p>If you need any assistance, feel free to reply to this email to reach out to the ambassadors. Enjoy the chat!</p>
-    <p>Best,<br>MSTI Admissions Ambassadors</p>
-    <hr class="sig-divider">
-    <div class="sig-block">
-      Master of Science in Technology Innovation<br>
-      Global Innovation Exchange (GIX)<br>
-      University of Washington<br>
-      <span class="sig-links">
-        <a href="mailto:joinmsti@uw.edu">joinmsti@uw.edu</a> |
-        <a href="#" target="_blank">GIX</a> |
-        <a href="#" target="_blank">LinkedIn</a>
-      </span><br>
-      <img src="images/email_image.png" alt="Global Innovation Exchange — University of Washington" class="sig-logo">
-      <div class="sig-social">
-        <a href="#" class="social-icon"><i class="fa-brands fa-facebook-f"></i></a>
-        <a href="#" class="social-icon"><i class="fa-brands fa-instagram"></i></a>
-        <a href="#" class="social-icon"><i class="fa-brands fa-x-twitter"></i></a>
-        <a href="#" class="social-icon"><i class="fa-brands fa-linkedin-in"></i></a>
-      </div>
-    </div>
-  `;
+  return `Subject: Prospective Student Connecting with MSTI Students and Alumni
+
+Dear ${studentFirst} and ${ambFirst},
+
+Thank you both for your interest in connecting with the MSTI network. Let me introduce you to each other!
+
+• Meet ${studentFirst}: a prospective MSTI student eager to learn more about the program and alumni experiences.
+  Email: ${req.studentEmail}
+
+• Meet ${amb.name}: ${ambRole}.
+  Email: ${amb.email}
+  LinkedIn: https://${amb.linkedin}
+
+You're welcome to connect directly via email to arrange a call, virtual meeting, or even an in-person visit based on your preferences. Hope this leads to a meaningful and engaging conversation.
+
+If you need any assistance, feel free to reply to this email. Enjoy the chat!
+
+Best,
+MSTI Admissions Ambassadors`;
+}
+
+function resetCoordEmail() {
+  const ta = document.getElementById("email-preview");
+  ta.value = ta.dataset.template || '';
 }
 
 function confirmSendIntro(reqId) {
