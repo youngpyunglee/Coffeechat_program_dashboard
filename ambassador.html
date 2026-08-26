@@ -1916,21 +1916,17 @@ University of Washington`;
 function buildFollowupEmailText(r, amb) {
   const firstName = r.studentName.split(' ')[0];
   const role = amb.type === 'alumni' ? 'Alumni Ambassador' : 'Student Ambassador';
+  const ambTitle = amb.type === 'alumni' ? 'MSTI alumni' : 'current MSTI student';
   const slots = getSlotsLines();
-  const ambDesc = amb.type === 'alumni'
-    ? `a UW MSTI alumni`
-    : `a current student in the MSTI program`;
   return `Hi ${firstName},
 
-I hope you're doing well! My name is ${amb.name}, and I'm ${ambDesc} at the University of Washington. You recently submitted a request through the MSTI Coffee Chat Program, and I've been matched with you — I'm excited to connect!
+It's great to meet you! I'm ${amb.name}, a ${ambTitle}. I'd be happy to share my experience with the program and answer any questions you may have.
 
-I'd love to introduce myself and answer any questions you have about the MSTI program, student life, the GIX community, or anything else on your mind. Here are a few times I'm available:
+Here are a few times I'm available — feel free to pick whichever works best or suggest another time:
 
 ${slots}
 
-Feel free to pick whichever works best, or suggest another time that's more convenient. You can also just reply by email if you'd prefer to start there!
-
-Looking forward to chatting with you,
+Looking forward to connecting!
 
 ${amb.name}
 MSTI ${role}
